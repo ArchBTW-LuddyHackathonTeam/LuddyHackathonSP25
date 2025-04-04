@@ -1,0 +1,17 @@
+# Global ignores
+.DS_Store
+Thumbs.db
+*.log
+*.temp
+*.tmp
+.env
+
+node_modules
+
+dist
+build
+out
+
+*.swp
+*.swo
+*.bak
