@@ -7,6 +7,8 @@ Thumbs.db
 .env
 
 node_modules
+.vscode
+.idea
 
 dist
 build
