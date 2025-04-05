@@ -48,6 +48,7 @@ export const resolvers = {
   Query: {
     departments: () => db.prepare('SELECT * FROM departments').all(),
     department: (_parent: any, { id }: { id: number }) => getById('departments', id),
+    department_name: (_parent: any, { name }: { name: string }) => db.prepare("SELECT * FROM departments WHERE name = ?").get(name),
 
     instructors: () => db.prepare('SELECT * FROM instructors').all(),
     instructor: (_parent: any, { id }: { id: number }) => getById('instructors', id),

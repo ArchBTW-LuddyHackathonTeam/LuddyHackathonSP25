@@ -62,3 +62,11 @@ export interface User {
     username: string,
     password: string
 }
+
+export interface DepartmentCourses {
+    courses: Course[]
+}
+
+export interface Course {
+    id: string
+}
