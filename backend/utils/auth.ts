@@ -3,9 +3,13 @@ import { JWTPayload, jwtVerify, SignJWT } from "jose"
 
 const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
 
-export function hashPassword(password: string): Promise<string> {
+export function createSalt(bytes: number): string {
+    return randomBytes(bytes).toString("hex")
+}
+
+export function hashPassword(password: string, salt: string): Promise<string> {
     return new Promise((resolve, reject) => {
-        pbkdf2(password, randomBytes(32).toString("hex"), 100000, 64, "sha256", (error, hashed) => {
+        pbkdf2(password, salt, 100000, 64, "sha256", (error, hashed) => {
             if (error) reject(error)
             else resolve(hashed.toString("hex"))
         })
