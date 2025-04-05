@@ -75,7 +75,7 @@ type Node {
   id: ID!
   title: String,
   number: Int,
-  course_id: Course,
+  course_id: Int,
   dropdown_children: Boolean,
   department: Department,
   prerequisites: [Node],
@@ -118,7 +118,8 @@ type Mutation {
   addDepartment(department: AddDepartmentInput!): Department
   updateDepartment(department: EditDepartmentInput!): Department
 
-  addInstructor()
+  addInstructor(instructor: AddInstructorInput!): Instructor
+  updateInstructor(instructor: EditInstructorUpdate!): Instructor
 
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
@@ -138,7 +139,7 @@ input EditDepartmentInput {
   description: String
 }
 
-#Instructor Mutation Inputs
+# Instructor Mutation Inputs
 input AddInstructorInput {
   name: String!
   department_id: ID!
@@ -148,6 +149,28 @@ input EditInstructorUpdate {
   id: ID!
   name: String
   department_id: ID
+}
+
+# Course Mutation Inputs
+input AddCourseInput {
+  department_id: ID!
+  course_code: String!
+  instruction_mode: String
+  terms_offered: String!
+  credits: Int!
+  description: String
+  instructor_id: ID
+}
+
+input EditCourseInput {
+  id: ID!
+  department_id: ID
+  course_code: String
+  instruction_mode: String
+  terms_offered: String
+  credits: Int
+  description: String
+  instructor_id: ID
 }
 
 # User Mutation Inputs

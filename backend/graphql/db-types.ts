@@ -26,6 +26,29 @@ export interface EditInstructorInput {
     department_id ?: string;
 }
 
+export interface AddCourseInput {
+    [key: string]: any;
+    department_id: number;
+    course_code: string;
+    instruction_mode ?: string;
+    terms_offered: string;
+    credits: number;
+    description ?: string;
+    instructor_id ?: number;
+}
+
+export interface EditCourseInput {
+    [key: string]: any;
+    id: number;
+    department_id ?: number;
+    course_code ?: string;
+    instruction_mode ?: string;
+    terms_offered ?: string;
+    credits ?: number;
+    description ?: string;
+    instructor_id ?: number;
+}
+
 export interface AddUserInput {
     [key: string]: any;
     salt: string;
