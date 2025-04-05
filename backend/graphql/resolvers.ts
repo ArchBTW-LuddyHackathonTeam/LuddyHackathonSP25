@@ -1,9 +1,48 @@
 import db from "./db";
-import { AddUserInput, AddDepartmentInput } from "./db-types";
+import { AddUserInput, AddDepartmentInput, EditDepartmentInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
 }
+
+const addEntry = (table: string, entry: AddUserInput | AddDepartmentInput) => {
+    const keys = Object.keys(entry);
+
+    const values: any[] = [];
+    const fields: string[] = [];
+
+    for (const key of keys) {
+        fields.push(key);
+        values.push(entry[key]);
+    }
+
+    const statement = db.prepare(`INSERT INTO ${table} (${fields.join(", ")}) VALUES (${Array(fields.length).fill("?").join(", ")})
+               RETURNING *`);
+
+    return statement.get(...values);
+}
+
+const editEntry = (table: string, entry: EditDepartmentInput) => {
+    const { id, ...updateFields } = entry;
+
+    const keys = Object.keys(updateFields).filter(key => updateFields[key] !== undefined);
+
+    if (keys.length === 0) {
+        throw new Error("No fields provided to update.");
+    }
+
+    const setClause = keys.map(key => `${key} = ?`).join(", ");
+    const values = keys.map(key => updateFields[key]);
+
+    const statement = db.prepare(`
+        UPDATE ${table}
+        SET ${setClause}
+        WHERE id = ?
+        RETURNING *
+    `);
+
+    return statement.get(...values, id);
+};
 
 export const resolvers = {
   Query: {
@@ -160,38 +199,39 @@ export const resolvers = {
   },
 
   Mutation: {
-    addDepartment: (_parent: any, { department }: { department: AddDepartmentInput }) => {
-        const values = [department.name];
-        const fields = ["name"];
+    addDepartment: (_parent: any, { department }: { department: AddDepartmentInput }) => 
+    addEntry("departments", department),
 
-        if (department.abbreviation) {
-            values.push(department.abbreviation);
-            fields.push("abbreviation");
-        }
+    // updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => {
+    //     const values = [];
+    //     const fields = [];
+    //
+    //     if (department.name) {
+    //         values.push(department.name);
+    //         fields.push("name")
+    //     }
+    //
+    //     if (department.abbreviation) {
+    //         values.push(department.abbreviation);
+    //         fields.push("abbreviation");
+    //     }
+    //
+    //     if (department.description) {
+    //         values.push(department.abbreviation);
+    //         fields.push("description");
+    //     }
+    //
+    //     const statement = db.prepare(`INSERT INTO departments (${fields.join(", ")}) 
+    //                                  VALUES (${Array(fields.length).fill("?").join(", ")}) 
+    //                                  RETURNING *`)
+    //
+    //     return statement.get(...values)
+    // },
+    //
+    updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => 
+        editEntry("departments", department),
 
-        if (department.description) {
-            values.push(department.description);
-            fields.push("description");
-        }
-
-        console.log(`INSERT INTO departments (${fields.join(", ")}) 
-                                     VALUES (${Array(fields.length).fill("?").join(", ")})`)
-
-        console.log(values);
-
-        const statement = db.prepare(`INSERT INTO departments (${fields.join(", ")}) 
-                                     VALUES (${Array(fields.length).fill("?").join(", ")}) 
-                                     RETURNING *`);
-
-        return statement.get(...values);
-    },
-
-    addUser: (_parent: any, { user }: { user: AddUserInput }) =>  
-        db
-            .prepare(`
-                     INSERT INTO users (salt, username, password) VALUES
-                     (?, ?, ?) RETURNING *
-                     `).get(user.salt, user.username, user.password),
+    addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
     deleteUser: (_parent: any, { id }: { id: number }) => // TODO: Add false return if user was not in database
         !!db.prepare(`DELETE FROM users WHERE id = ?`).run(id),
