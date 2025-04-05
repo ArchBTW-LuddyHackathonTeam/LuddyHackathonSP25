@@ -5,6 +5,7 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE departments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
+    abbreviation TEXT,
     description TEXT
 );
 
