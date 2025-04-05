@@ -21,7 +21,8 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jose": "^5.9.6",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "openai": "^4.91.1"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
