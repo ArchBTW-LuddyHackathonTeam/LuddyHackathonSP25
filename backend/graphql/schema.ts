@@ -48,7 +48,7 @@ type Course {
   id: ID!
   department: Department
   courseCode: String
-  instructionNode: String
+  instructionMode: String
   termsOffered: String
   credits: Int
   description: String
