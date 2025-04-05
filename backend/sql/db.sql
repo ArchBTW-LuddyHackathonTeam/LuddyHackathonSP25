@@ -108,3 +108,10 @@ CREATE TABLE node_prerequisites (
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (prerequisite_node_id) REFERENCES nodes(id)
 );
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    salt VARCHAR(64) NOT NULL,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL
+);

@@ -69,6 +69,14 @@ type CourseAttribute {
   courses: [Course!]
 }
 
+# Users
+type User {
+    id: ID!
+    salt: String!
+    username: String!
+    password: String!
+}
+
 # Root Query
 type Query {
   departments: [Department!]
@@ -85,6 +93,9 @@ type Query {
 
   course_attributes: [CourseAttribute!]
   course_attribute(id: ID!): CourseAttribute
+
+  users: [User!]
+  user(id: ID!): User
 }
 
 `
