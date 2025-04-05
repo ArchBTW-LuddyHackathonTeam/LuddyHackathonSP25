@@ -3,6 +3,7 @@ export const typeDefs = `#graphql
 type Department {
   id: ID!
   name: String!
+  abbreviation: String
   description: String
   instructors: [Instructor!]
   courses: [Course!]
@@ -114,8 +115,19 @@ type Query {
 
 # Mutations
 type Mutation {
-  addUser(user: AddUserInput): User
+  addDepartment(department: AddDepartmentInput!): Department
+  updateDepartment: Department
+  deleteDepartment(id: ID!): Boolean!
+
+  addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
+}
+
+# Department Mutation Inputs
+input AddDepartmentInput {
+  name: String!
+  abbreviation: String
+  description: String
 }
 
 # User Mutation Inputs
