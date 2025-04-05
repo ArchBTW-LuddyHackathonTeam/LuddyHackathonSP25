@@ -6,7 +6,8 @@ import { User } from "../graphql/db-types"
 const router = Router()
 
 router.post("/verify", (req, res) => {
-    if (req.body.username && req.body.password) {
+    if (req.cookies.token) res.status(401).json({ message: "Unauthorized Access" })
+    else if (req.body.username && req.body.password) {
         internalRequest(`
             query Query($username: String!) {
                 user_username(username: $username) {
@@ -29,11 +30,12 @@ router.post("/verify", (req, res) => {
             .catch(_ => {
                 res.sendStatus(401)
             })
-    }
+    } else res.status(403).json({ message: "Please provide both a username and password" })
 })
 
 router.post("/", (req, res) => {
-    if (req.body.username && req.body.password) {
+    if (req.cookies.token) res.status(401).json({ message: "Unauthorized Access" })
+    else if (req.body.username && req.body.password) {
         const salt = createSalt(32)
         hashPassword(req.body.password, salt)
             .then(password => internalRequest(`
@@ -51,10 +53,8 @@ router.post("/", (req, res) => {
             })
             .then(signToken)
             .then(token => res.status(200).cookie("token", token, { maxAge: 7*24*60*60*1000, httpOnly: true }).json({}))
-            .catch(_ => {
-                res.sendStatus(401)
-            })
-    }
+            .catch(_ => res.status(403).json({ message: "Please provide an available username" }))
+    } else res.status(403).json({ message: "Please provide both a username and password" })
 })
 
 export default router
