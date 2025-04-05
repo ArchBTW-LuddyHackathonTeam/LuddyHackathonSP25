@@ -101,6 +101,7 @@ type Query {
   instructor(id: ID!): Instructor
 
   courses: [Course!]
+  courses_ids(ids: [ID!]): [Course!]
   course(id: ID!): Course
 
   sections: [Section!]

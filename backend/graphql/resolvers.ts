@@ -56,6 +56,7 @@ export const resolvers = {
     instructor: (_parent: any, { id }: { id: number }) => getById('instructors', id),
 
     courses: () => db.prepare('SELECT * FROM courses').all(),
+    courses_ids: (_parent: any, { ids }: { ids: number[] } ) => db.prepare(`SELECT * FROM courses WHERE id IN (${ids.map(_ => "?").join(", ")})`).all(...ids),
     course: (_parent: any, { id }: { id: number }) => getById('courses', id),
 
     sections: () => db.prepare('SELECT * FROM sections').all(),
