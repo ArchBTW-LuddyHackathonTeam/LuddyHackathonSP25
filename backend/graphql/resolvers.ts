@@ -116,6 +116,49 @@ export const resolvers = {
         .all(parent.id),
   },
 
+  Node: {
+    attributes: (parent: any) =>
+      db
+        .prepare(
+          `
+          SELECT ca.* FROM course_attributes ca
+          JOIN node_attribute_mapping nam ON ca.id = nam.attribute_id
+          WHERE nam.node_id = ?
+        `
+        )
+        .all(parent.id),
+
+    prerequisites: (parent: any) =>
+      db
+        .prepare(
+          `
+          SELECT n.* FROM nodes n
+          JOIN node_prerequisites np ON n.id = np.prerequisite_node_id
+          WHERE np.node_id = ?
+        `
+        )
+        .all(parent.id),
+
+    chooseNClasses: (parent: any) =>
+      db
+        .prepare(
+          `
+          SELECT course_id FROM node_course_mapping
+          WHERE node_id = ?
+        `
+        )
+        .all(parent.id)
+        .map((row: any) => row.course_id),
+      
+    department: (parent: any) => {
+      if (!parent.department_id) return null;
+      const department = db
+        .prepare("SELECT name FROM departments WHERE id = ?")
+        .get(parent.department_id);
+      return department ? department.name : null;
+    },
+  },
+
   Mutation: {
     addDepartment: (_parent: any, { department }: { department: AddDepartmentInput }) => {
         const values = [department.name];
