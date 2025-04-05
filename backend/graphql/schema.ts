@@ -2,61 +2,63 @@ export const typeDefs = `#graphql
 # Department type
 type Department {
   id: ID!
-  name: String
+  name: String!
   description: String
-  instructors: [Instructor]
-  courses: [Course]
+  instructors: [Instructor!]
+  courses: [Course!]
 }
 
 # Instructor type
 type Instructor {
   id: ID!
-  name: String
-  department: Department
-  reviews: [InstructorReview]
-  officeHours: [OfficeHour]
-  courses: [Course]
+  name: String!
+  department: Department!
+  reviews: [InstructorReview!]
+  officeHours: [OfficeHour!]
+  courses: [Course!]
 }
 
 # Review for an instructor
 type InstructorReview {
   id: ID!
-  instructor: Instructor
+  instructor: Instructor!
+  quality_score: Int!
+  difficulty_score: Int!
   review: String
 }
 
 # Office hours for an instructor
 type OfficeHour {
   id: ID!
-  instructor: Instructor
-  daysOfWeek: String
-  timeOfDay: String
-  type: String
+  instructor: Instructor!
+  days_of_week: String!
+  time_of_day: String!
+  type: String!
 }
 
 # Course Section
 type Section {
   id: ID!
-  daysOfWeek: String
-  timeOfDay: String
-  type: String
-  courses: [Course]
+  days_of_week: String!
+  time_of_day: String!
+  type: String!
+  courses: [Course!]
 }
 
 # Course
 type Course {
   id: ID!
-  department: Department
-  courseCode: String
-  instructionMode: String
-  termsOffered: String
-  credits: Int
+  department: Department!
+  course_code: String!
+  instruction_mode: String
+  terms_offered: String
+  credits: Int!
   description: String
   instructor: Instructor
-  sections: [Section]
-  prerequisites: [Course]
-  requiredFor: [Course]
-  attributes: [CourseAttribute]
+  sections: [Section!]
+  prerequisites: [Course!]
+  required_for: [Course!]
+  attributes: [CourseAttribute!]
 }
 
 # Course Attribute
@@ -64,25 +66,25 @@ type CourseAttribute {
   id: ID!
   name: String!
   description: String
-  courses: [Course]
+  courses: [Course!]
 }
 
 # Root Query
 type Query {
-  departments: [Department]
+  departments: [Department!]
   department(id: ID!): Department
 
-  instructors: [Instructor]
+  instructors: [Instructor!]
   instructor(id: ID!): Instructor
 
-  courses: [Course]
+  courses: [Course!]
   course(id: ID!): Course
 
-  sections: [Section]
+  sections: [Section!]
   section(id: ID!): Section
 
-  courseAttributes: [CourseAttribute]
-  courseAttribute(id: ID!): CourseAttribute
+  course_attributes: [CourseAttribute!]
+  course_attribute(id: ID!): CourseAttribute
 }
 
 `
