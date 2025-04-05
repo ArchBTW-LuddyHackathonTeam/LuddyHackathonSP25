@@ -4,6 +4,7 @@ import { expressMiddleware } from "@apollo/server/express4";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import morgan from "morgan";
 
 import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
@@ -16,6 +17,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(morgan("dev"));
 
 const server = new ApolloServer({
     typeDefs,
