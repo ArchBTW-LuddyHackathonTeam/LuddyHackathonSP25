@@ -96,10 +96,10 @@ CREATE TABLE course_attribute_mapping (
 -- Table for Nodes (each node can represent a course, degree, etc.)
 CREATE TABLE nodes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    title TEXT NOT NULL,
-    number INTEGER NOT NULL,
-    course_id INTEGER NOT NULL,
-    dropdown_children INTEGER NOT NULL,
+    title TEXT,
+    number INTEGER,
+    course_id INTEGER,
+    dropdown_children INTEGER,
     FOREIGN KEY (course_id) REFERENCES courses(id)
     -- Additional columns (e.g., description) can be added here if needed
 );
@@ -111,6 +111,14 @@ CREATE TABLE node_prerequisites (
     PRIMARY KEY (node_id, prerequisite_node_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (prerequisite_node_id) REFERENCES nodes(id)
+);
+
+CREATE TABLE node_attribute_mapping (
+    node_id INTEGER NOT NULL,
+    attribute_id INTEGER NOT NULL,
+    PRIMARY KEY (node_id, attribute_id),
+    FOREIGN KEY (node_id) REFERENCES nodes(id),
+    FOREIGN KEY (attribute_id) REFERENCES course_attributes(id)
 );
 
 CREATE TABLE users (
