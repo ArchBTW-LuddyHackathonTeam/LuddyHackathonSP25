@@ -3,6 +3,7 @@ export interface Node {
   titleValue?: string;
   numberValue?: number;
   attributes?: Attribute[];
+  chooseNClasses?: number[];
   courseID?: number;
   dropdownChildren?: boolean;
   department?: string;
