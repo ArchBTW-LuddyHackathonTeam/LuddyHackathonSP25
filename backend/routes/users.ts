@@ -10,10 +10,10 @@ router.post("/verify", (req, res) => {
         internalRequest(`
             query Query($username: String!) {
                 user_username(username: $username) {
-                  id
-                  salt
-                  username
-                  password
+                    id
+                    salt
+                    username
+                    password
                 }
             }`, { "username": req.body.username })
             .then(userData => {
