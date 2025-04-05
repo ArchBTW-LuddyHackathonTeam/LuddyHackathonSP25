@@ -135,6 +135,6 @@ CREATE TABLE node_course_mapping (
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     salt VARCHAR(64) NOT NULL,
-    username TEXT NOT NULL,
+    username TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL
 );
