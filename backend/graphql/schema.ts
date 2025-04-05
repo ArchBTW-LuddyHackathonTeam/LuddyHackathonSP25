@@ -52,7 +52,7 @@ type Course {
   department: Department!
   course_code: String!
   instruction_mode: String
-  terms_offered: String
+  terms_offered: [String!]
   credits: Int!
   description: String
   instructor: Instructor

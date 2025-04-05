@@ -51,12 +51,18 @@ CREATE TABLE courses (
     department_id INTEGER NOT NULL,
     course_code TEXT NOT NULL,
     instruction_mode TEXT,
-    terms_offered TEXT NOT NULL, -- e.g. 'Fall,Spring'
     credits INT NOT NULL,
     description TEXT,
     instructor_id INTEGER,
     FOREIGN KEY (department_id) REFERENCES departments(id),
     FOREIGN KEY (instructor_id) REFERENCES instructors(id)
+);
+
+-- Table for strings of terms offered for courses (one to many)
+CREATE TABLE courses_terms_offered (
+    course_id INTEGER NOT NULL,
+    terms_offered TEXT NOT NULL,
+    FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
 -- Join table for Course Sections (many-to-many)

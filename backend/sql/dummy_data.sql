@@ -38,20 +38,35 @@ INSERT INTO sections (days_of_week, time_of_day, type) VALUES
   ('Monday,Wednesday,Friday', '1:00 PM - 2:00 PM', 'Lecture');
 
 -- Insert dummy courses (original set)
-INSERT INTO courses (department_id, course_code, instruction_mode, terms_offered, credits, description, instructor_id) VALUES
-  (1, 'CS101', 'In-person', 'Fall,Spring', 3, 'Introduction to Computer Science', 1),
-  (1, 'CS201', 'Hybrid', 'Fall', 4, 'Data Structures and Algorithms', 3),
-  (2, 'MATH101', 'In-person', 'Fall,Spring', 3, 'Calculus I', 2),
-  (3, 'PHY101', 'Virtual', 'Spring', 4, 'Fundamentals of Physics', 4);
+INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
+  (1, 'CS101', 'In-person', 3, 'Introduction to Computer Science', 1),
+  (1, 'CS201', 'Hybrid', 4, 'Data Structures and Algorithms', 3),
+  (2, 'MATH101', 'In-person', 3, 'Calculus I', 2),
+  (3, 'PHY101', 'Virtual', 4, 'Fundamentals of Physics', 4);
 
 -- Insert new courses to enhance prerequisite testing
 -- Note: IDs for new courses will auto-increment; assuming the original courses got IDs 1-4, these become 5 and onward.
-INSERT INTO courses (department_id, course_code, instruction_mode, terms_offered, credits, description, instructor_id) VALUES
-  (1, 'CS301', 'In-person', 'Fall', 3, 'Advanced Algorithms', 1),        -- ID 5
-  (1, 'CS401', 'Hybrid', 'Spring', 4, 'Machine Learning', 3),              -- ID 6
-  (2, 'MATH201', 'In-person', 'Fall,Spring', 3, 'Linear Algebra', 2),        -- ID 7
-  (2, 'MATH301', 'In-person', 'Spring', 3, 'Differential Equations', 2),     -- ID 8
-  (3, 'PHY201', 'Virtual', 'Fall', 4, 'Quantum Physics', 4);               -- ID 9
+INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
+  (1, 'CS301', 'In-person', 3, 'Advanced Algorithms', 1),        -- ID 5
+  (1, 'CS401', 'Hybrid', 4, 'Machine Learning', 3),              -- ID 6
+  (2, 'MATH201', 'In-person', 3, 'Linear Algebra', 2),        -- ID 7
+  (2, 'MATH301', 'In-person', 3, 'Differential Equations', 2),     -- ID 8
+  (3, 'PHY201', 'Virtual', 4, 'Quantum Physics', 4);               -- ID 9
+
+-- Insert courses offered for above courses
+INSERT INTO courses_terms_offered (course_id, terms_offered) VALUES
+  (1, 'Fall'),
+  (1, 'Spring'),
+  (2, 'Spring'),
+  (3, 'Fall'),
+  (3, 'Spring'),
+  (4, 'Spring'),
+  (5, 'Fall'),
+  (6, 'Spring'),
+  (7, 'Fall'),
+  (7, 'Spring'),
+  (8, 'Spring'),
+  (9, 'Fall');
 
 -- Insert dummy course_sections (original mappings)
 INSERT INTO course_sections (course_id, section_id) VALUES

@@ -135,6 +135,15 @@ export const resolvers = {
           WHERE cam.course_id = ?
         `)
         .all(parent.id),
+    terms_offered: (parent: any) => { 
+      const result = db
+        .prepare(`
+      SELECT terms_offered FROM courses_terms_offered WHERE course_id = ?
+        `)
+        .all(parent.id) as { terms_offered: string }[] 
+
+      return result.map(inner => inner.terms_offered);
+    }, 
   },
 
   Section: {

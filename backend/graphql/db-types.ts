@@ -34,7 +34,6 @@ export interface AddCourseInput extends AddInput {
     department_id: number;
     course_code: string;
     instruction_mode ?: string;
-    terms_offered: string;
     credits: number;
     description ?: string;
     instructor_id ?: number;
@@ -44,7 +43,6 @@ export interface EditCourseInput extends EditInput {
     department_id ?: number;
     course_code ?: string;
     instruction_mode ?: string;
-    terms_offered ?: string;
     credits ?: number;
     description ?: string;
     instructor_id ?: number;
