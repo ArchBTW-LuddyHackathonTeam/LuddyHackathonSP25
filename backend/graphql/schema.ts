@@ -128,6 +128,9 @@ type Mutation {
   addSection(section: AddSectionInput!): Section
   updateSection(section: EditSectioninput!): Section
 
+  addCourseAttribute(courseAttribute: AddCourseAttributeInput!): CourseAttribute
+  updateCourseAttribute(courseAttribute: EditCourseAttributeInput!): CourseAttribute
+
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
 }
