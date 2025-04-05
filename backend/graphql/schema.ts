@@ -69,6 +69,19 @@ type CourseAttribute {
   courses: [Course!]
 }
 
+# Node
+type Node {
+  id: ID!
+  title: String,
+  number: Int,
+  course_id: Int,
+  dropdown_children: Boolean,
+  department: Department,
+  prerequisites: [Node],
+  attributes: [CourseAttribute],
+  chooseNClasses: [Course]
+}
+
 # Users
 type User {
     id: ID!

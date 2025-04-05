@@ -99,8 +99,10 @@ CREATE TABLE nodes (
     title TEXT,
     number INTEGER,
     course_id INTEGER,
-    dropdown_children INTEGER,
+    dropdown_children BOOLEAN NOT NULL DEFAULT 0 CHECK (dropdown_children IN (0, 1)),
+    department_id INTEGER,
     FOREIGN KEY (course_id) REFERENCES courses(id)
+    FOREIGN KEY (department_id) REFERENCES departments(id)
     -- Additional columns (e.g., description) can be added here if needed
 );
 
@@ -119,6 +121,15 @@ CREATE TABLE node_attribute_mapping (
     PRIMARY KEY (node_id, attribute_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (attribute_id) REFERENCES course_attributes(id)
+);
+
+-- Join table for Node Chosen Classes (maps nodes to courses they choose)
+CREATE TABLE node_course_mapping (
+    node_id INTEGER NOT NULL,
+    course_id INTEGER NOT NULL,
+    PRIMARY KEY (node_id, course_id),
+    FOREIGN KEY (node_id) REFERENCES nodes(id),
+    FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
 CREATE TABLE users (
