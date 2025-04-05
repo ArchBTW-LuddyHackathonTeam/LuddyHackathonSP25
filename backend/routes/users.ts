@@ -15,7 +15,7 @@ router.post("/verify", (req, res) => {
                     username
                     password
                 }
-            }`, { "username": req.body.username })
+            }`, { username: req.body.username })
             .then(userData => {
                 if (userData && userData.user_username) return userData.user_username as User
                 else throw new Error()
