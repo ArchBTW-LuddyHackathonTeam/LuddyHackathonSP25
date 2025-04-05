@@ -17,3 +17,5 @@ out
 *.swp
 *.swo
 *.bak
+
+*.db
