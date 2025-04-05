@@ -22,6 +22,8 @@ type Instructor {
 type InstructorReview {
   id: ID!
   instructor: Instructor!
+  quality_score: Int!
+  difficulty_score: Int!
   review: String
 }
 
