@@ -98,4 +98,17 @@ type Query {
   user(id: ID!): User
 }
 
+# Mutations
+type Mutation {
+  addUser(user: AddUserInput): User
+  deleteUser(id: ID!): Boolean!
+}
+
+# User Mutation Inputs
+input AddUserInput {
+  salt: String!
+  username: String!
+  password: String!
+}
+
 `

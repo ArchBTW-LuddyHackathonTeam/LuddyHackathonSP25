@@ -1,4 +1,5 @@
 import db from "./db";
+import { AddUserInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
@@ -112,5 +113,16 @@ export const resolvers = {
           WHERE cam.attribute_id = ?
         `)
         .all(parent.id),
+  },
+
+  Mutation: {
+    addUser: (_parent: any, { user }: { user: AddUserInput }) =>  
+        db
+            .prepare(`
+                     INSERT INTO users (salt, username, password) VALUES
+                     (?, ?, ?) RETURNING *
+                     `).get(user.salt, user.username, user.password),
+    deleteUser: (_parent: any, { id }: { id: number }) => 
+        !!db.prepare(`DELETE FROM users WHERE id = ?`).run(id),
   },
 }
