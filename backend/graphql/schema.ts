@@ -75,7 +75,7 @@ type Node {
   id: ID!
   title: String,
   number: Int,
-  course_id: Int,
+  course_id: Course,
   dropdown_children: Boolean,
   department: Department,
   prerequisites: [Node],
