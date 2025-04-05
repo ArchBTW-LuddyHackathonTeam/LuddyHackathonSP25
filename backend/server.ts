@@ -29,27 +29,6 @@ async function startServer() {
     await apolloServer.start();
 
     app.use(
-        "/",
-        cors<cors.CorsRequest>(),
-        express.json(),
-        async () => {
-            const query = `query Query {
-  instructors {
-    id
-    reviews {
-      id
-      quality_score
-      difficulty_score
-      review
-    }
-  }
-}`;
-            const response = await internalRequest(query);
-            console.log(JSON.stringify(response));
-        },
-    );
-
-    app.use(
         "/graphql",
         cors<cors.CorsRequest>(),
         express.json(),
