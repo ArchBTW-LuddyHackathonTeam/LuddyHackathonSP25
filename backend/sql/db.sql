@@ -37,9 +37,9 @@ CREATE TABLE office_hours (
 -- Table for Sections (for courses)
 CREATE TABLE sections (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    days_of_week TEXT,  -- e.g. 'Monday,Wednesday'
-    time_of_day TEXT,
-    type TEXT            -- e.g. 'Lecture', 'Lab'
+    days_of_week TEXT NOT NULL,  -- e.g. 'Monday,Wednesday'
+    time_of_day TEXT NOT NULL,
+    type TEXT NOT NULL            -- e.g. 'Lecture', 'Lab'
 );
 
 -- Table for Courses
@@ -58,8 +58,8 @@ CREATE TABLE courses (
 
 -- Join table for Course Sections (many-to-many)
 CREATE TABLE course_sections (
-    course_id INTEGER,
-    section_id INTEGER,
+    course_id INTEGER NOT NULL,
+    section_id INTEGER NOT NULL,
     PRIMARY KEY (course_id, section_id),
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (section_id) REFERENCES sections(id)
@@ -67,8 +67,8 @@ CREATE TABLE course_sections (
 
 -- Join table for Course Prerequisites (self-referencing many-to-many)
 CREATE TABLE course_prerequisites (
-    course_id INTEGER,
-    prerequisite_course_id INTEGER,
+    course_id INTEGER NOT NULL,
+    prerequisite_course_id INTEGER NOT NULL,
     PRIMARY KEY (course_id, prerequisite_course_id),
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (prerequisite_course_id) REFERENCES courses(id)
@@ -83,8 +83,8 @@ CREATE TABLE course_attributes (
 
 -- Join table to map courses to their attributes
 CREATE TABLE course_attribute_mapping (
-    course_id INTEGER,
-    attribute_id INTEGER,
+    course_id INTEGER NOT NULL,
+    attribute_id INTEGER NOT NULL,
     PRIMARY KEY (course_id, attribute_id),
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (attribute_id) REFERENCES course_attributes(id)
@@ -99,8 +99,8 @@ CREATE TABLE nodes (
 
 -- Join table for Node Prerequisites (self-referencing many-to-many relationship)
 CREATE TABLE node_prerequisites (
-    node_id INTEGER,
-    prerequisite_node_id INTEGER,
+    node_id INTEGER NOT NULL,
+    prerequisite_node_id INTEGER NOT NULL,
     PRIMARY KEY (node_id, prerequisite_node_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (prerequisite_node_id) REFERENCES nodes(id)

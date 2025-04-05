@@ -37,10 +37,10 @@ type OfficeHour {
 # Course Section
 type Section {
   id: ID!
-  daysOfWeek: String
-  timeOfDay: String
-  type: String
-  courses: [Course]
+  daysOfWeek: String!
+  timeOfDay: String!
+  type: String!
+  courses: [Course!]
 }
 
 # Course
@@ -64,24 +64,24 @@ type CourseAttribute {
   id: ID!
   name: String!
   description: String
-  courses: [Course]
+  courses: [Course!]
 }
 
 # Root Query
 type Query {
-  departments: [Department]
+  departments: [Department!]
   department(id: ID!): Department
 
-  instructors: [Instructor]
+  instructors: [Instructor!]
   instructor(id: ID!): Instructor
 
-  courses: [Course]
+  courses: [Course!]
   course(id: ID!): Course
 
-  sections: [Section]
+  sections: [Section!]
   section(id: ID!): Section
 
-  courseAttributes: [CourseAttribute]
+  courseAttributes: [CourseAttribute!]
   courseAttribute(id: ID!): CourseAttribute
 }
 
