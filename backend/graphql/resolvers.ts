@@ -24,6 +24,7 @@ export const resolvers = {
     
     users: () => db.prepare("SELECT * FROM users").all(),
     user: (_parent: any, { id }: { id: number }) => getById("users", id),
+    user_username: (_parent: any, { username }: { username: string }) => db.prepare("SELECT * FROM users WHERE username = ?").get(username),
   },
 
   Department: {

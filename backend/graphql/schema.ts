@@ -96,6 +96,7 @@ type Query {
 
   users: [User!]
   user(id: ID!): User
+  user_username(username: String!): User
 }
 
 # Mutations
