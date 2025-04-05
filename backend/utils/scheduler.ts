@@ -5,6 +5,7 @@ export interface Node {
   attributes?: Attribute[];
   courseID?: number;
   dropdownChildren?: boolean;
+  department?: string;
   preRecs: Node[];
 }
 
