@@ -29,16 +29,16 @@ type InstructorReview {
 type OfficeHour {
   id: ID!
   instructor: Instructor!
-  daysOfWeek: String!
-  timeOfDay: String!
+  days_of_week: String!
+  time_of_day: String!
   type: String!
 }
 
 # Course Section
 type Section {
   id: ID!
-  daysOfWeek: String!
-  timeOfDay: String!
+  days_of_week: String!
+  time_of_day: String!
   type: String!
   courses: [Course!]
 }
@@ -81,8 +81,8 @@ type Query {
   sections: [Section!]
   section(id: ID!): Section
 
-  courseAttributes: [CourseAttribute!]
-  courseAttribute(id: ID!): CourseAttribute
+  course_attributes: [CourseAttribute!]
+  course_attribute(id: ID!): CourseAttribute
 }
 
 `

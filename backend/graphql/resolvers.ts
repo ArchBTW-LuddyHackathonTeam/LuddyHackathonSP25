@@ -18,8 +18,8 @@ export const resolvers = {
     sections: () => db.prepare('SELECT * FROM sections').all(),
     section: (_parent: any, { id }: { id: number }) => getById('sections', id),
 
-    courseAttributes: () => db.prepare('SELECT * FROM course_attributes').all(),
-    courseAttribute: (_parent: any, { id }: { id: number }) => getById('course_attributes', id),
+    course_attributes: () => db.prepare('SELECT * FROM course_attributes').all(),
+    course_attribute: (_parent: any, { id }: { id: number }) => getById('course_attributes', id),
   },
 
   Department: {
