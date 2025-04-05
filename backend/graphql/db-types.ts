@@ -3,3 +3,10 @@ export interface AddUserInput {
     username: string;
     password: string;
 }
+
+export interface User {
+    id: string,
+    salt: string,
+    username: string,
+    password: string
+}

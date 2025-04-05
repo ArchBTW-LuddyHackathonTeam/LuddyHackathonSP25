@@ -1,5 +1,6 @@
 import { randomBytes, pbkdf2 } from "crypto"
 import { JWTPayload, jwtVerify, SignJWT } from "jose"
+import { User } from "../graphql/db-types"
 
 const jwtSecret = new TextEncoder().encode(process.env.JWT_SECRET)
 
@@ -16,14 +17,16 @@ export function hashPassword(password: string, salt: string): Promise<string> {
     })
 }
 
-export function signToken(payload: object): Promise<string> {
-    return new SignJWT(payload as JWTPayload)
+export function signToken(payload: User): Promise<string> {
+    return new SignJWT({ username: payload.username, id: payload.id } as JWTPayload)
         .setProtectedHeader({ alg: "HS256" })
         .setIssuedAt()
         .setExpirationTime("7d")
         .sign(jwtSecret)
 }
 
-export function verifyToken(token: string): Promise<object> {
+export function verifyToken(token: string): Promise<User> {
     return jwtVerify(token, jwtSecret)
+        .then(verify => verify.payload)
+        .then(payload => payload as object as User)
 }
