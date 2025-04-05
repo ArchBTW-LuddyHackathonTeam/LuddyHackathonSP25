@@ -89,3 +89,19 @@ CREATE TABLE course_attribute_mapping (
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (attribute_id) REFERENCES course_attributes(id)
 );
+
+-- Table for Nodes (each node can represent a course, degree, etc.)
+CREATE TABLE nodes (
+    id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL
+    -- Additional columns (e.g., description) can be added here if needed
+);
+
+-- Join table for Node Prerequisites (self-referencing many-to-many relationship)
+CREATE TABLE node_prerequisites (
+    node_id INTEGER,
+    prerequisite_node_id INTEGER,
+    PRIMARY KEY (node_id, prerequisite_node_id),
+    FOREIGN KEY (node_id) REFERENCES nodes(id),
+    FOREIGN KEY (prerequisite_node_id) REFERENCES nodes(id)
+);
