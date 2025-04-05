@@ -1,11 +1,12 @@
 import db from "./db";
-import { AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput, EditInstructorInput } from "./db-types";
+import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput, EditInstructorInput,
+    AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
 }
 
-const addEntry = (table: string, entry: AddUserInput | AddDepartmentInput) => {
+const addEntry = (table: string, entry: AddInput) => {
     const keys = Object.keys(entry);
 
     const values: any[] = [];
@@ -22,7 +23,7 @@ const addEntry = (table: string, entry: AddUserInput | AddDepartmentInput) => {
     return statement.get(...values);
 }
 
-const editEntry = (table: string, entry: EditDepartmentInput) => {
+const editEntry = (table: string, entry: EditInput) => {
     const { id, ...updateFields } = entry;
 
     const keys = Object.keys(updateFields).filter(key => updateFields[key] !== undefined);
@@ -209,6 +210,24 @@ export const resolvers = {
 
     updateInstructor: (_parent: any, { instructor }: { instructor: EditInstructorInput }) => 
         editEntry("instructors", instructor),
+
+    addCourse: (_parent: any, { course }: { course: AddCourseInput }) => 
+        addEntry("courses", course),
+
+    updateCourse: (_parent: any, { course }: { course: EditCourseInput }) => 
+        editEntry("courses", course),
+        
+    addSection: (_parent: any, { section }: { section: AddSectionInput }) => 
+        addEntry("sections", section),
+
+    updateSection: (_parent: any, { section }: { section: EditSectionInput }) => 
+        editEntry("sections", section),
+
+    addCourseAttribute: (_parent: any, { courseAttribute }: { courseAttribute: AddCourseAttributeInput }) => 
+        addEntry("course_attributes", courseAttribute),
+
+    updateCourseAttribute: (_parent: any, { courseAttribute }: { courseAttribute: EditCourseAttributeInput }) => 
+        editEntry("course_attributes", courseAttribute),
 
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
