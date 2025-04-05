@@ -21,6 +21,8 @@ CREATE TABLE instructors (
 CREATE TABLE instructor_reviews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     instructor_id INTEGER NOT NULL,
+    quality_score INTEGER NOT NULL CHECK (quality_score >= 1 AND quality_score <= 5),
+    difficulty_score INTEGER NOT NULL CHECK (difficulty_score >= 1 AND quality_score <= 5),
     review TEXT,
     FOREIGN KEY (instructor_id) REFERENCES instructors(id)
 );
