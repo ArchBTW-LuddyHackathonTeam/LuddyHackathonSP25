@@ -20,6 +20,13 @@ if (!dbExists) {
     
     db.exec(sql);
 
+    // Add dummy data 
+    console.log("Adding dummy data");
+    const dataFilePath = path.resolve("sql/dummy_data.sql");
+    const data = fs.readFileSync(dataFilePath, "utf-8");
+
+    db.exec(data);
+
     console.log("Initialized database tables");
 }
 
