@@ -13,6 +13,19 @@ export interface EditDepartmentInput {
     description ?: string;
 }
 
+export interface AddInstructorInput {
+    [key: string]: any;
+    name: string;
+    department_id: number;
+}
+
+export interface EditInstructorInput {
+    [key: string]: any;
+    id: number;
+    name ?: string;
+    department_id ?: string;
+}
+
 export interface AddUserInput {
     [key: string]: any;
     salt: string;

@@ -1,5 +1,5 @@
 import db from "./db";
-import { AddUserInput, AddDepartmentInput, EditDepartmentInput } from "./db-types";
+import { AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput, EditInstructorInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
@@ -202,34 +202,14 @@ export const resolvers = {
     addDepartment: (_parent: any, { department }: { department: AddDepartmentInput }) => 
     addEntry("departments", department),
 
-    // updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => {
-    //     const values = [];
-    //     const fields = [];
-    //
-    //     if (department.name) {
-    //         values.push(department.name);
-    //         fields.push("name")
-    //     }
-    //
-    //     if (department.abbreviation) {
-    //         values.push(department.abbreviation);
-    //         fields.push("abbreviation");
-    //     }
-    //
-    //     if (department.description) {
-    //         values.push(department.abbreviation);
-    //         fields.push("description");
-    //     }
-    //
-    //     const statement = db.prepare(`INSERT INTO departments (${fields.join(", ")}) 
-    //                                  VALUES (${Array(fields.length).fill("?").join(", ")}) 
-    //                                  RETURNING *`)
-    //
-    //     return statement.get(...values)
-    // },
-    //
     updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => 
         editEntry("departments", department),
+
+    addInstructor: (_parent: any, { instructor }: { instructor: AddInstructorInput }) => 
+        addEntry("instructors", instructor),
+
+    updateInstructor: (_parent: any, { instructor }: { instructor: EditInstructorInput }) => 
+        editEntry("instructors", instructor),
 
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 

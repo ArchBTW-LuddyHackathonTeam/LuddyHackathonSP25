@@ -117,7 +117,8 @@ type Query {
 type Mutation {
   addDepartment(department: AddDepartmentInput!): Department
   updateDepartment(department: EditDepartmentInput!): Department
-  deleteDepartment(id: ID!): Boolean!
+
+  addInstructor()
 
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
@@ -135,6 +136,18 @@ input EditDepartmentInput {
   name: String
   abbreviation: String
   description: String
+}
+
+#Instructor Mutation Inputs
+input AddInstructorInput {
+  name: String!
+  department_id: ID!
+}
+
+input EditInstructorUpdate {
+  id: ID!
+  name: String
+  department_id: ID
 }
 
 # User Mutation Inputs
