@@ -1,6 +1,7 @@
 import db from "./db";
-import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput, EditInstructorInput,
-    AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput } from "./db-types";
+import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput,
+    EditInstructorInput, AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput, AddCourseAttributeInput,
+    EditCourseAttributeInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
