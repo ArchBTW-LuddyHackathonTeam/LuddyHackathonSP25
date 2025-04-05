@@ -8,6 +8,7 @@ import morgan from "morgan";
 
 import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
+import internalRequest from "./graphql/internal";
 
 const app = express();
 
@@ -19,19 +20,40 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 
-const server = new ApolloServer({
+const apolloServer = new ApolloServer({
     typeDefs,
     resolvers,
 });
 
 async function startServer() {
-    await server.start();
+    await apolloServer.start();
+
+    app.use(
+        "/",
+        cors<cors.CorsRequest>(),
+        express.json(),
+        async () => {
+            const query = `query Query {
+  instructors {
+    id
+    reviews {
+      id
+      quality_score
+      difficulty_score
+      review
+    }
+  }
+}`;
+            const response = await internalRequest(query);
+            console.log(JSON.stringify(response));
+        },
+    );
 
     app.use(
         "/graphql",
         cors<cors.CorsRequest>(),
         express.json(),
-        expressMiddleware(server),
+        expressMiddleware(apolloServer),
     );
 
     dotenv.config();
@@ -44,3 +66,5 @@ async function startServer() {
 }
 
 startServer();
+
+export default apolloServer;
