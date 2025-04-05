@@ -31,7 +31,7 @@ INSERT INTO sections (days_of_week, time_of_day, type) VALUES
 
 -- 6. Insert Courses
 -- department_id and instructor_id reference departments and instructors respectively.
-INSERT INTO courses (department_id, course_code, instruction_node, terms_offered, credits, description, instructor_id) VALUES
+INSERT INTO courses (department_id, course_code, instruction_mode, terms_offered, credits, description, instructor_id) VALUES
   (1, 'CS101', 'Introduction to Computer Science fundamentals', 'Fall,Spring', 3, 'Covers basics of programming, algorithms, and problem solving.', 1),
   (2, 'MATH101', 'Calculus I: Differential Calculus', 'Fall', 4, 'Introduction to limits, derivatives, and integrals.', 2);
 

@@ -4,22 +4,22 @@ PRAGMA foreign_keys = ON;
 -- Table for Departments
 CREATE TABLE departments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
+    name TEXT NOT NULL,
     description TEXT
 );
 
 -- Table for Instructors
 CREATE TABLE instructors (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    department_id INTEGER,
+    name TEXT NOT NULL,
+    department_id INTEGER NOT NULL,
     FOREIGN KEY (department_id) REFERENCES departments(id)
 );
 
 -- Table for Instructor Reviews (one-to-many)
 CREATE TABLE instructor_reviews (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    instructor_id INTEGER,
+    instructor_id INTEGER NOT NULL,
     review TEXT,
     FOREIGN KEY (instructor_id) REFERENCES instructors(id)
 );
@@ -27,10 +27,10 @@ CREATE TABLE instructor_reviews (
 -- Table for Office Hours (associated with instructors)
 CREATE TABLE office_hours (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    instructor_id INTEGER,
-    days_of_week TEXT,  -- e.g. 'Tuesday'
-    time_of_day TEXT,      -- e.g. '2:00 PM - 4:00 PM'
-    type TEXT,
+    instructor_id INTEGER NOT NULL,
+    days_of_week TEXT NOT NULL,  -- e.g. 'Tuesday'
+    time_of_day TEXT NOT NULL,      -- e.g. '2:00 PM - 4:00 PM'
+    type TEXT NOT NULL,
     FOREIGN KEY (instructor_id) REFERENCES instructors(id)
 );
 
@@ -45,11 +45,11 @@ CREATE TABLE sections (
 -- Table for Courses
 CREATE TABLE courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    department_id INTEGER,
-    course_code TEXT,
-    instruction_node TEXT,
-    terms_offered TEXT, -- e.g. 'Fall,Spring'
-    credits INT,
+    department_id INTEGER NOT NULL,
+    course_code TEXT NOT NULL,
+    instruction_mode TEXT,
+    terms_offered TEXT NOT NULL, -- e.g. 'Fall,Spring'
+    credits INT NOT NULL,
     description TEXT,
     instructor_id INTEGER,
     FOREIGN KEY (department_id) REFERENCES departments(id),

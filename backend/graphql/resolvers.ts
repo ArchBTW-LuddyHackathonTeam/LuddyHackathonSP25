@@ -71,7 +71,7 @@ export const resolvers = {
           WHERE cp.course_id = ?
         `)
         .all(parent.id),
-    requiredFor: (parent: any) =>
+    required_for: (parent: any) =>
       db
         .prepare(`
           SELECT c.* FROM courses c
