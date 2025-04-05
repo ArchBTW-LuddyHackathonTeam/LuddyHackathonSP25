@@ -12,6 +12,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@apollo/server": "^4.11.3",
     "@types/cors": "^2.8.17",
     "better-sqlite3": "^11.9.1",
     "cookie-parser": "^1.4.7",
