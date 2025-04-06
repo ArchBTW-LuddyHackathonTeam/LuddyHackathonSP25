@@ -1,128 +1,252 @@
--- Insert dummy departments
-INSERT INTO departments (name, abbreviation, description) VALUES 
-  ('Computer Science', 'CS', 'Department of Computer Science'),
-  ('Mathematics', 'MATH', 'Department of Mathematics'),
-  ('Physics', 'PHY', 'Department of Physics');
+-- *********************************************
+-- New Course Attributes based on enum Attribute:
+-- AH = "A&H", SH = "S&H", WC = "World Culture",
+-- WL = "World Language", NM = "N&M", IW = "Intensive Writing",
+-- EC = "English Composition", MM = "Mathematical Modeling"
+-- *********************************************
+INSERT INTO course_attributes (id, name, description) VALUES
+  (1, 'A&H', 'Arts & Humanities requirement'),
+  (2, 'S&H', 'Social & Historical Studies requirement'),
+  (3, 'World Culture', 'World Culture requirement'),
+  (4, 'World Language', 'World Language requirement'),
+  (5, 'N&M', 'Natural & Mathematical Sciences requirement'),
+  (6, 'Intensive Writing', 'Intensive Writing requirement'),
+  (7, 'English Composition', 'English Composition requirement'),
+  (8, 'Mathematical Modeling', 'Mathematical Modeling requirement');
 
--- Insert dummy instructors
-INSERT INTO instructors (name, department_id) VALUES
-  ('Alice Smith', 1),
-  ('Bob Johnson', 2),
-  ('Charlie Brown', 1),
-  ('Dana White', 3);
+-- *********************************************
+-- Insert Nodes for the degree/program and requirements hierarchy
+-- (Mapping JSON keys: id, titleValue, numberValue, courseID, dropdownChildren)
+-- *********************************************
 
--- Insert dummy instructor reviews
-INSERT INTO instructor_reviews (instructor_id, quality_score, difficulty_score, review) VALUES
-  (1, 5, 3, 'Excellent teaching with clear explanations.'),
-  (1, 4, 4, 'Very approachable and knowledgeable.'),
-  (2, 3, 5, 'Challenging course, but very rewarding.'),
-  (3, 4, 2, 'Engaging lectures and supportive office hours.'),
-  (4, 5, 4, 'Highly recommended for students interested in physics.');
+-- Node 1: Computer Science BS (preRecs: [3, 17, 18, 19])
+INSERT INTO nodes (id, title, dropdown_children) VALUES
+  (1, 'Computer Science BS', 0);
 
--- Insert dummy office hours
-INSERT INTO office_hours (instructor_id, days_of_week, time_of_day, type) VALUES
-  (1, 'Monday,Wednesday', '2:00 PM - 3:00 PM', 'In-person'),
-  (2, 'Tuesday', '10:00 AM - 12:00 PM', 'Virtual'),
-  (3, 'Thursday', '1:00 PM - 2:00 PM', 'In-person'),
-  (4, 'Friday', '3:00 PM - 5:00 PM', 'In-person');
+-- Node 3: Bachelors of Science (preRecs: [4, 15, 16])
+INSERT INTO nodes (id, title, dropdown_children) VALUES
+  (3, 'Bachelors of Science', 0);
 
--- Insert dummy sections (existing)
-INSERT INTO sections (days_of_week, time_of_day, type) VALUES
-  ('Monday,Wednesday,Friday', '9:00 AM - 10:00 AM', 'Lecture'),
-  ('Tuesday,Thursday', '1:00 PM - 2:30 PM', 'Lab'),
-  ('Monday,Wednesday', '11:00 AM - 12:30 PM', 'Lecture');
+-- Node 4: General Education Requirements (preRecs: [5, 6, 7, 8, 9, 10])
+INSERT INTO nodes (id, title, dropdown_children) VALUES
+  (4, 'General Education Requirements', 0);
 
--- Insert additional sections for new courses
-INSERT INTO sections (days_of_week, time_of_day, type) VALUES
-  ('Tuesday,Thursday', '3:00 PM - 4:30 PM', 'Lecture'),
-  ('Monday,Wednesday,Friday', '1:00 PM - 2:00 PM', 'Lecture');
+-- Node 5: Complete One English Composition Course (numberValue: 1, attributes: ["EC"])
+INSERT INTO nodes (id, title, number) VALUES
+  (5, 'Complete One English Composition Course', 1);
 
--- Insert dummy courses (original set)
-INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
-  (1, 'CS101', 'In-person', 3, 'Introduction to Computer Science', 1),
-  (1, 'CS201', 'Hybrid', 4, 'Data Structures and Algorithms', 3),
-  (2, 'MATH101', 'In-person', 3, 'Calculus I', 2),
-  (3, 'PHY101', 'Virtual', 4, 'Fundamentals of Physics', 4);
+-- Node 6: Complete One Mathematical Modeling Course (numberValue: 1, attributes: ["MM"])
+INSERT INTO nodes (id, title, number) VALUES
+  (6, 'Complete One Mathematical Modeling Course', 1);
 
--- Insert new courses to enhance prerequisite testing
--- Note: IDs for new courses will auto-increment; assuming the original courses got IDs 1-4, these become 5 and onward.
-INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
-  (1, 'CS301', 'In-person', 3, 'Advanced Algorithms', 1),        -- ID 5
-  (1, 'CS401', 'Hybrid', 4, 'Machine Learning', 3),              -- ID 6
-  (2, 'MATH201', 'In-person', 3, 'Linear Algebra', 2),        -- ID 7
-  (2, 'MATH301', 'In-person', 3, 'Differential Equations', 2),     -- ID 8
-  (3, 'PHY201', 'Virtual', 4, 'Quantum Physics', 4);               -- ID 9
+-- Node 7: Complete 6 credits of Arts and Humanities courses (numberValue: 6, attributes: ["AH"])
+INSERT INTO nodes (id, title, number) VALUES
+  (7, 'Complete 6 credits of Arts and Humanities courses', 6);
 
--- Insert courses offered for above courses
-INSERT INTO courses_terms_offered (course_id, term_offered) VALUES
-  (1, 'Fall'),
-  (1, 'Spring'),
-  (2, 'Spring'),
-  (3, 'Fall'),
-  (3, 'Spring'),
-  (4, 'Spring'),
-  (5, 'Fall'),
-  (6, 'Spring'),
-  (7, 'Fall'),
-  (7, 'Spring'),
-  (8, 'Spring'),
-  (9, 'Fall');
+-- Node 8: Complete 6 credits of Social and Historical Studies courses (numberValue: 6, attributes: ["SH"])
+INSERT INTO nodes (id, title, number) VALUES
+  (8, 'Complete 6 credits of Social and Historical Studies courses', 6);
 
--- Insert dummy course_sections (original mappings)
-INSERT INTO course_sections (course_id, section_id) VALUES
-  (1, 1),
-  (1, 3),
-  (2, 1),
-  (3, 2),
-  (4, 3);
+-- Node 9: Complete 5 credits of Natural and Mathematical Science courses (numberValue: 5, attributes: ["NM"])
+INSERT INTO nodes (id, title, number) VALUES
+  (9, 'Complete 5 credits of Natural and Mathematical Science courses', 5);
 
--- Map new courses to sections (using newly inserted section IDs 4 and 5 along with some existing ones)
-INSERT INTO course_sections (course_id, section_id) VALUES
-  (5, 4),   -- CS301 with new Lecture section
-  (6, 5),   -- CS401 with new Lecture section
-  (7, 4),   -- MATH201 using section 4
-  (8, 1),   -- MATH301 using existing Lecture
-  (9, 5);   -- PHY201 using section 5
+-- Node 10: World Languages & Cultures Requirement (dropdownChildren: true, preRecs: [11, 12, 13])
+INSERT INTO nodes (id, title, dropdown_children) VALUES
+  (10, 'World Languages & Cultures Requirement', 1);
 
--- Insert dummy course_prerequisites (original prerequisites)
-INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES
-  (2, 1),   -- CS201 requires CS101
-  (4, 3);   -- PHY101 requires MATH101
-
--- Insert additional course prerequisites for new courses
-INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES
-  (5, 2),   -- CS301 requires CS201
-  (6, 2),   -- CS401 requires CS201
-  (6, 3),   -- CS401 also requires MATH101
-  (7, 3),   -- MATH201 requires MATH101
-  (8, 7),   -- MATH301 requires MATH201
-  (9, 4),   -- PHY201 requires PHY101
-  (9, 7);   -- PHY201 also requires MATH201
-
--- Insert dummy course attributes
-INSERT INTO course_attributes (name, description) VALUES
-  ('Lab Required', 'This course includes a lab component'),
-  ('Writing Intensive', 'Significant writing assignments included'),
-  ('Project Based', 'Course involves group projects and presentations');
-
--- Map courses to attributes
-INSERT INTO course_attribute_mapping (course_id, attribute_id) VALUES
-  (1, 3),    -- CS101: Project Based
-  (2, 1),    -- CS201: Lab Required
-  (2, 3),    -- CS201: Project Based
-  (3, 2),    -- MATH101: Writing Intensive
-  (4, 1),    -- PHY101: Lab Required
-  (6, 3),    -- CS401: Project Based
-  (7, 1);    -- MATH201: Lab Required
-
--- Insert dummy nodes (e.g., representing degrees or programs)
+-- Node 11: Language Study (attributes: ["WL"])
 INSERT INTO nodes (id, title) VALUES
-  (1, 'Bachelor of Science in Computer Science'),
-  (2, 'Bachelor of Science in Mathematics'),
-  (3, 'Master of Science in Physics');
+  (11, 'Language Study');
 
--- Insert dummy node prerequisites (e.g., a master's program requiring bachelor's degrees)
-INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES
-  (3, 1),
-  (3, 2);
+-- Node 12: Complete 6 credits of World Culture courses (numberValue: 6, attributes: ["WC"])
+INSERT INTO nodes (id, title, number) VALUES
+  (12, 'Complete 6 credits of World Culture courses', 6);
 
+-- Node 13: Study Abroad Program
+INSERT INTO nodes (id, title) VALUES
+  (13, 'Study Abroad Program');
+
+-- Node 15: Complete 120 credit hours (numberValue: 120)
+INSERT INTO nodes (id, title, number) VALUES
+  (15, 'Complete 120 credit hours', 120);
+
+-- Node 16: Complete 36 credits at 300-400 level
+INSERT INTO nodes (id, title) VALUES
+  (16, 'Complete 36 credits at 300-400 level');
+
+-- Node 17: Complete 40 credits in Computer science core courses (numberValue: 40)
+INSERT INTO nodes (id, title, number) VALUES
+  (17, 'Complete 40 credits in Computer science core courses', 40);
+
+-- Node 18: Complete 16 credits in Mathematics courses (numberValue: 16)
+INSERT INTO nodes (id, title, number) VALUES
+  (18, 'Complete 16 credits in Mathematics courses', 16);
+
+-- Node 19: Computer Science Specialization (dropdownChildren: true, preRecs: [20, 28])
+INSERT INTO nodes (id, title, dropdown_children) VALUES
+  (19, 'Computer Science Specialization', 1);
+
+-- Node 20: Software Engineering (preRecs: [21, 22, 23, 25, 26, 27])
+INSERT INTO nodes (id, title) VALUES
+  (20, 'Software Engineering');
+
+-- Node 21: CSCI-B 461 Database Concepts (courseID: 461)
+INSERT INTO nodes (id, title, course_id) VALUES
+  (21, 'CSCI-B 461 Database Concepts', 461);
+
+-- Node 22: CSCI-P 465 Software Engineering for Information Systems (courseID: 465)
+INSERT INTO nodes (id, title, course_id) VALUES
+  (22, 'CSCI-P 465 Software Engineering for Information Systems', 465);
+
+-- Node 23: Select one course from the following: (numberValue: 1, chooseNClasses: [322, 466])
+INSERT INTO nodes (id, title, number) VALUES
+  (23, 'Select one course from the following:', 1);
+
+-- Node 25: Select one course from the following: (numberValue: 1, chooseNClasses: [323, 335])
+INSERT INTO nodes (id, title, number) VALUES
+  (25, 'Select one course from the following:', 1);
+
+-- Node 26: Select one course from the following: (numberValue: 1, chooseNClasses: [403, 414, 423, 436])
+INSERT INTO nodes (id, title, number) VALUES
+  (26, 'Select one course from the following:', 1);
+
+-- Node 27: Select one additional P course
+INSERT INTO nodes (id, title) VALUES
+  (27, 'Select one additional P course');
+
+-- Node 28: Systems (preRecs: [29, 30, 31, 33, 34])
+INSERT INTO nodes (id, title) VALUES
+  (28, 'Systems');
+
+-- Node 29: CSCI-C 291 System Programming with C and Unix (courseID: 291)
+INSERT INTO nodes (id, title, course_id) VALUES
+  (29, 'CSCI-C 291 System Programming with C and Unix', 291);
+
+-- Node 30: CSCI-C 335 Computer Structures (courseID: 335)
+INSERT INTO nodes (id, title, course_id) VALUES
+  (30, 'CSCI-C 335 Computer Structures', 335);
+
+-- Node 31: Select one project course from the following: (numberValue: 1, chooseNClasses: [436, 438, 442, 545])
+INSERT INTO nodes (id, title, number) VALUES
+  (31, 'Select one project course from the following:', 1);
+
+-- Node 33: Select one additional systems course from the following (Not used for project course): 
+-- (numberValue: 1, chooseNClasses: [434, 436, 438, 441, 442, 443, 490, 545])
+INSERT INTO nodes (id, title, number) VALUES
+  (33, 'Select one additional systems course from the following (Not used for project course):', 1);
+
+-- Node 34: Select one course from the following: (numberValue: 1, chooseNClasses: [401, 403, 405])
+INSERT INTO nodes (id, title, number) VALUES
+  (34, 'Select one course from the following:', 1);
+
+-- *********************************************
+-- Insert Node Prerequisites (each row: node_id requires prerequisite_node_id)
+-- *********************************************
+
+-- For Node 1 (preRecs: [3, 17, 18, 19])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (1, 3);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (1, 17);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (1, 18);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (1, 19);
+
+-- For Node 3 (preRecs: [4, 15, 16])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (3, 4);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (3, 15);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (3, 16);
+
+-- For Node 4 (preRecs: [5, 6, 7, 8, 9, 10])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 5);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 6);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 7);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 8);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 9);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (4, 10);
+
+-- For Node 10 (preRecs: [11, 12, 13])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (10, 11);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (10, 12);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (10, 13);
+
+-- For Node 19 (preRecs: [20, 28])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (19, 20);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (19, 28);
+
+-- For Node 20 (preRecs: [21, 22, 23, 25, 26, 27])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 21);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 22);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 23);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 25);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 26);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (20, 27);
+
+-- For Node 28 (preRecs: [29, 30, 31, 33, 34])
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (28, 29);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (28, 30);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (28, 31);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (28, 33);
+INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES (28, 34);
+
+-- *********************************************
+-- Insert Node Attribute Mapping (for nodes with attributes)
+-- *********************************************
+
+-- Node 5: attributes ["EC"] --> English Composition (id=7)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (5, 7);
+
+-- Node 6: attributes ["MM"] --> Mathematical Modeling (id=8)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (6, 8);
+
+-- Node 7: attributes ["AH"] --> A&H (id=1)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (7, 1);
+
+-- Node 8: attributes ["SH"] --> S&H (id=2)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (8, 2);
+
+-- Node 9: attributes ["NM"] --> N&M (id=5)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (9, 5);
+
+-- Node 11: attributes ["WL"] --> World Language (id=4)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (11, 4);
+
+-- Node 12: attributes ["WC"] --> World Culture (id=3)
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES (12, 3);
+
+-- *********************************************
+-- Insert Node Course Mapping (for nodes with chooseNClasses)
+-- *********************************************
+
+-- Node 23: chooseNClasses: [322, 466]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (23, 322);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (23, 466);
+
+-- Node 25: chooseNClasses: [323, 335]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (25, 323);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (25, 335);
+
+-- Node 26: chooseNClasses: [403, 414, 423, 436]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (26, 403);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (26, 414);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (26, 423);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (26, 436);
+
+-- Node 31: chooseNClasses: [436, 438, 442, 545]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (31, 436);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (31, 438);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (31, 442);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (31, 545);
+
+-- Node 33: chooseNClasses: [434, 436, 438, 441, 442, 443, 490, 545]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 434);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 436);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 438);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 441);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 442);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 443);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 490);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (33, 545);
+
+-- Node 34: chooseNClasses: [401, 403, 405]
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (34, 401);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (34, 403);
+INSERT INTO node_course_mapping (node_id, course_id) VALUES (34, 405);
