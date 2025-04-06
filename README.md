@@ -1,13 +1,19 @@
 # iGPS++
-A modern course selector for universities featuring an AI Assistant for personalized course recommendations.
+A modern course planner for universities featuring an AI Assistant for personalized course recommendations.
 
 ## 🚀 About
 
+### Introduction
+Traditional university course selectors have long been burdened by unintuitive designs and a lack of personalization. Students often find themselves mired in clunky interfaces that complicate rather than clarify the course planning process. Motivated by these challenges, we came together to create iGPS++.
+
 ### Inspiration and Concept
-iGPS++ emerged as a response to the inherent limitations of traditional university course selectors. It is designed to provide a comprehensive solution that integrates an intuitive course selection interface with an intelligent assistant offering personalized academic recommendations. Our homepage functions as a centralized hub for all essential information, while a dedicated page connects users directly with the AI assistant.
+After exploring several existing systems, we identified key areas for improvement: usability, streamlined navigation, and personalized recommendations. We observed that many course planners suffer from cluttered interfaces, overly complex navigation, and generic suggestions that do not cater to individual needs. In response, iGPS++ brings together a home-based course selection interface with an intelligent assistant designed to offer tailored academic recommendations.
+
+#### Design Concept
+We were inspired by the simplicity found in modern projects and applications. Our design centers on a clean main page featuring a unified dropdown view of courses, requirements, and all other essential elements needed for effective planning. This streamlined interface is enhanced by an AI assistant tab that introduces personalized course recommendations and accommodates advising questions.
 
 ### Development Process, Challenges, and Insights
-The development of iGPS++ began with a brainstorming session to define key functional and aesthetic requirements. Responsibilities were then divided among front-end development, database management, and AI integration. While this initial division of labor presented challenges in synchronizing independently developed modules, these issues were resolved through a couple hours of integration coupled with continuous communication. This iterative process not only improved the reliability and maintainability of the system, but also helped us appreciate the importance of collaborative problem solving.
+The development of iGPS++ began with a brainstorming session aimed at defining our core functional and aesthetic requirements. We then divided responsibilities among front-end development, database management, and AI integration. While this initial division of labor presented challenges in synchronizing independently developed modules, these issues were resolved through a few hours of integration and continuous communication. This iterative process not only enhanced the system's reliability and maintainability but also helped us appreciate the value of collaborative problem solving.
 
 ## 📝 Getting Started
 
