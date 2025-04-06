@@ -299,47 +299,25 @@ const CourseTree = () => {
 
   // Handle class selection for "choose N" nodes
   const toggleClassSelection = (nodeId, classId, attribute = null) => {
-    console.log(`=== TOGGLE CLASS SELECTION ===`);
-    console.log(`Parameters: nodeId=${nodeId}, classId=${classId}, attribute=${attribute}`);
-    console.log(`Type of classId: ${typeof classId}`);
-    
     // Ensure consistent type (convert to string)
     const stringNodeId = String(nodeId);
     const stringClassId = String(classId);
     
-    console.log(`Converted: nodeId=${stringNodeId}, classId=${stringClassId}`);
-    
     setSelectedClasses(prev => {
       const currentSelected = prev[stringNodeId] || [];
-      console.log(`Current selected for node ${stringNodeId}:`, currentSelected);
-      console.log(`Types of current selections:`, currentSelected.map(id => typeof id));
       
-      // Convert all current selections to strings for consistent comparison
-      const currentSelectedStrings = currentSelected.map(id => String(id));
-      
-      if (currentSelectedStrings.includes(stringClassId)) {
-        console.log(`REMOVING: Class ${stringClassId} is already selected, removing it`);
+      // If the course is already selected, remove it (deselect)
+      if (currentSelected.includes(stringClassId)) {
         return {
           ...prev,
-          [stringNodeId]: currentSelected.filter(id => String(id) !== stringClassId)
+          [stringNodeId]: currentSelected.filter(id => id !== stringClassId)
         };
       } else {
-        // Check if we've already selected the max number
-        const node = nodeMap[nodeId];
-        if (node && node.numberValue && currentSelected.length >= node.numberValue) {
-          console.log(`REPLACING: Max selection reached, replacing oldest with ${stringClassId}`);
-          // Replace the oldest selection
-          return {
-            ...prev,
-            [stringNodeId]: [...currentSelected.slice(1), stringClassId]
-          };
-        } else {
-          console.log(`ADDING: Adding class ${stringClassId} to selections`);
-          return {
-            ...prev,
-            [stringNodeId]: [...currentSelected, stringClassId]
-          };
-        }
+        // If not selected, add it (no limit check)
+        return {
+          ...prev,
+          [stringNodeId]: [...currentSelected, stringClassId]
+        };
       }
     });
   };
