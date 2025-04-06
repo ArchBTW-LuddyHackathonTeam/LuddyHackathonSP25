@@ -16,9 +16,10 @@ import nodeRoute from "./routes/node";
 import classesRoute from "./routes/classes"
 
 const app = express();
+const frontend = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:3321",
     credentials: true,
 }));
 app.use(express.json());
@@ -28,6 +29,7 @@ app.use("/users", usersRoute);
 app.use("/scheduler", schedulerRoute);
 app.use("/node", nodeRoute);
 app.use("/classes", classesRoute);
+frontend.use("/assets", express.static("views/assets"))
 
 const apolloServer = new ApolloServer({
     typeDefs,
@@ -44,11 +46,18 @@ async function startServer() {
         expressMiddleware(apolloServer),
     );
 
+    frontend.get("/", (_req, res) => {
+        res.sendFile(`${process.cwd()}/views/index.html`)
+    })
+
+    frontend.use((_req, res, _next) => res.sendFile(`${process.cwd()}/views/index.html`))
+
     const port = 3000;
     app.listen(
         port,
         () => console.log(`Server is running on http://localhost:${port}`),
     );
+    frontend.listen(3321)
 }
 
 startServer();

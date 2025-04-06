@@ -6,7 +6,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "tsc && nodemon dist/server.js",
-    "clean-db": "rm igps++.db igps++.db-shm igps++.db-wal"
+    "clean-db": "rm igps++.db igps++.db-shm igps++.db-wal",
+    "setup": "cp -r ../frontend/dist/. views"
   },
   "keywords": [],
   "author": "",
