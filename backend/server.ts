@@ -6,9 +6,12 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import morgan from "morgan";
 
+dotenv.config();
+
 import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
 import usersRoute from "./routes/users"
+import schedulerRoute from "./routes/scheduler"
 
 const app = express();
 
@@ -20,6 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
 app.use("/users", usersRoute);
+app.use("/scheduler", schedulerRoute);
 
 const apolloServer = new ApolloServer({
     typeDefs,
@@ -35,8 +39,6 @@ async function startServer() {
         express.json(),
         expressMiddleware(apolloServer),
     );
-
-    dotenv.config();
 
     const port = 3000;
     app.listen(
