@@ -3,7 +3,7 @@ import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentIn
     EditInstructorInput, AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput, AddCourseAttributeInput,
             EditCourseAttributeInput, AddCourseTermOfferedInput, AddInstructorOfficeHoursInput,
             EditInstructorOfficeHoursInput, AddCourseSectionInput, AddCoursePrerequisiteInput,
-            AddCourseAttributeRelationInput } from "./db-types";
+            AddCourseAttributeRelationInput, AddNodeInput, EditNodeInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
@@ -280,6 +280,12 @@ export const resolvers = {
         return db.prepare("SELECT * FROM courses WHERE id = ?").get(relation.course_id);
     },
 
+    addNode: (_parent: any, { node }: { node: AddNodeInput }) => 
+        addEntry("nodes", node),
+
+    updateNode: (_parent: any, { node }: { node: EditNodeInput }) => 
+        editEntry("nodes", node),
+    
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
     deleteUser: (_parent: any, { id }: { id: number }) => // TODO: Add false return if user was not in database

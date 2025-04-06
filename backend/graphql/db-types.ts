@@ -104,6 +104,22 @@ export interface AddCourseAttributeRelationInput extends AddInput {
     attribute_id: number;
 }
 
+export interface AddNodeInput extends AddInput {
+    title ?: string;
+    number ?: number;
+    course_id ?: number;
+    dropdown_children: boolean;
+    department_id ?: number;
+}
+
+export interface EditNodeInput extends EditInput {
+    title ?: string;
+    number ?: number;
+    course_id ?: number;
+    dropdown_children ?: boolean;
+    department_id ?: number;
+}
+
 export interface AddUserInput extends AddInput {
     salt: string;
     username: string;

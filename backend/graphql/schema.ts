@@ -148,6 +148,9 @@ type Mutation {
 
   addCourseAttributeRelation(relation: AddCoursePrerequisiteRelationInput!): Course
 
+  addNode(node: AddNodeInput): Node
+  updateNode(node: EditNodeInput): Node
+
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
 }
@@ -262,6 +265,24 @@ input AddCoursePrerequisiteInput {
 input AddCoursePrerequisiteRelationInput {
   course_id: ID!
   attribute_id: ID!
+}
+
+# Node Mutation Inputs
+input AddNodeInput {
+  title: String
+  number: String
+  course_id: ID
+  dropdown_children: Boolean!
+  department_id: ID
+}
+
+input EditNodeInput {
+  id: ID!
+  title: String
+  number: String
+  course_id: ID
+  dropdown_children: Boolean
+  department_id: ID
 }
 
 # User Mutation Inputs
