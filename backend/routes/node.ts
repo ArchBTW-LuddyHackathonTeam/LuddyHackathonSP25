@@ -67,8 +67,6 @@ router.get("/:id", async (req, res) => {
             preRecs: temp.prerequisite_ids,
         };
 
-        console.log(response, temp);
-
         if (temp.title) {
             response.titleValue = temp.title;
         }
