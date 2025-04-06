@@ -13,15 +13,26 @@ import Assistant from './Assistant';
 
 // Import utilities
 import { 
-  initialTreeData, 
-  initialAssistantMessages, 
-  generateDummyClasses, 
-  Attribute, 
+  initialAssistantMessages,
   AttributeColors, 
   getNodeType, 
   getNodeCompletion, 
   getNodeStatusIcon 
 } from './utils';
+
+// Import API services
+import {
+  getRootNodes,
+  buildDegreeTree,
+  getNodeById,
+  getClassesByAttribute,
+  getClassesByCourseIds,
+  searchClasses,
+  getClassesByDepartment,
+  getClass,
+  getClasses,
+  Attribute
+} from '../services/api';
 
 // Import Assistant context
 import { AssistantProvider } from '../services/AssistantContext';
@@ -35,7 +46,7 @@ const CourseTree = () => {
   const [selectedClasses, setSelectedClasses] = useState({});
   const [nodeInputValues, setNodeInputValues] = useState({});
   const [expandedCourses, setExpandedCourses] = useState({});
-  const [dummyClassData, setDummyClassData] = useState({});
+  const [classData, setClassData] = useState({});
   const [selectedSpecialization, setSelectedSpecialization] = useState({});
   const [zoom, setZoom] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -53,110 +64,127 @@ const CourseTree = () => {
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [courseSearchTerms, setCourseSearchTerms] = useState({});
   const [filteredCourseData, setFilteredCourseData] = useState({});
-  // New state for completed classes
+  // State for completed classes
   const [completedClasses, setCompletedClasses] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
+  
   const containerRef = useRef(null);
   const nodeRefs = useRef({});
 
-  // Process tree data to create a proper hierarchy
+  // Load root nodes from API
   useEffect(() => {
-    // Convert the flat array into a map for easier access
-    const nodeMap = {};
-    initialTreeData.forEach(node => {
-      nodeMap[node.id] = { ...node, children: [] };
-    });
-    
-    // Connect parent-child relationships
-    initialTreeData.forEach(node => {
-      if (node.preRecs && node.preRecs.length > 0) {
-        node.preRecs.forEach(childId => {
-          if (nodeMap[childId]) {
-            nodeMap[node.id].children.push(nodeMap[childId]);
-          }
-        });
-      }
-    });
-    
-    // Find root nodes (those that aren't children of any other node)
-    const roots = initialTreeData.filter(node => {
-      return !initialTreeData.some(parent => 
-        parent.preRecs && parent.preRecs.includes(node.id)
-      );
-    });
-    
-    setTreeData(roots.map(root => nodeMap[root.id]));
-    setNodeMap(nodeMap);
-    
-    // Initialize expanded state (root nodes are expanded by default)
-    const initialExpanded = {};
-    roots.forEach(root => {
-      initialExpanded[root.id] = true;
-    });
-    setExpandedNodes(initialExpanded);
-
-    // Calculate total credits
-    let total = 0;
-    initialTreeData.forEach(node => {
-      if (node.numberValue && !node.chooseNClasses) {
-        total += node.numberValue;
-      }
-    });
-    setTotalCredits(total);
-  }, []);
-
-  // Generate dummy class data for attributes
-  useEffect(() => {
-    const dummyData = {};
-    
-    // For attribute-based nodes
-    Object.keys(Attribute).forEach(attr => {
-      dummyData[attr] = generateDummyClasses(attr, 15);
-    });
-    
-    // For course selection nodes
-    initialTreeData.forEach(node => {
-      if (node.chooseNClasses && node.chooseNClasses.length) {
-        dummyData[`choose_${node.id}`] = node.chooseNClasses.map(courseId => {
-          // Randomly assign 1-2 attributes for variety
-          const attrKeys = Object.keys(Attribute);
-          const numAttrs = Math.floor(Math.random() * 2) + 1;
-          const courseAttributes = [];
-          for (let j = 0; j < numAttrs; j++) {
-            const randomAttr = attrKeys[Math.floor(Math.random() * attrKeys.length)];
-            if (!courseAttributes.includes(randomAttr)) {
-              courseAttributes.push(randomAttr);
-            }
-          }
+    const fetchInitialData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Fetch root nodes
+        const roots = await getRootNodes();
+        
+        if (roots && roots.length > 0) {
+          // Build the complete tree for each root node
+          const fullTrees = await Promise.all(
+            roots.map(root => buildDegreeTree(root.id))
+          );
           
-          return {
-            id: `course-${courseId}`,
-            code: `CSCI ${courseId}`,
-            name: `Advanced Course ${courseId}`,
-            professor: "Dr. Smith",
-            credits: 3,
-            days: ["Mon", "Wed", "Fri"],
-            time: "10:00 AM - 11:15 AM",
-            rating: (Math.random() * 4 + 1).toFixed(1),
-            completed: false,
-            capacity: Math.floor(Math.random() * 30) + 20,
-            enrolled: Math.floor(Math.random() * 20),
-            attributes: courseAttributes,
-            location: `Building ${Math.floor(Math.random() * 10) + 1}, Room ${Math.floor(Math.random() * 300) + 100}`,
-            description: `This course covers advanced topics in computer science focusing on specific algorithms, data structures, and programming paradigms relevant to this domain.`
+          setTreeData(fullTrees);
+          
+          // Initialize expanded state (root nodes are expanded by default)
+          const initialExpanded = {};
+          roots.forEach(root => {
+            initialExpanded[root.id] = true;
+          });
+          
+          setExpandedNodes(initialExpanded);
+          
+          // Create node map for easier access
+          const nodeMapObj = {};
+          
+          // Helper function to traverse the tree and populate the node map
+          const processNode = (node) => {
+            nodeMapObj[node.id] = node;
+            
+            // Process children (prerequisites) if they are Node objects
+            if (node.preRecs && Array.isArray(node.preRecs)) {
+              node.preRecs.forEach(child => {
+                if (typeof child === 'object') {
+                  processNode(child);
+                }
+              });
+            }
           };
-        });
+          
+          // Process each tree
+          fullTrees.forEach(tree => processNode(tree));
+          
+          setNodeMap(nodeMapObj);
+          
+          // Calculate total credits
+          let total = 0;
+          Object.values(nodeMapObj).forEach(node => {
+            if (node.numberValue && !node.chooseNClasses) {
+              total += node.numberValue;
+            }
+          });
+          
+          setTotalCredits(total);
+        }
+      } catch (error) {
+        console.error("Error fetching initial tree data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    });
+    };
     
-    setDummyClassData(dummyData);
-    setFilteredCourseData(dummyData); // Initialize filtered data with full data
+    fetchInitialData();
   }, []);
+
+  // Load class data for attributes and course selections
+  useEffect(() => {
+    const loadClassData = async () => {
+      if (Object.keys(nodeMap).length === 0) return;
+      
+      try {
+        const newClassData = {};
+        
+        // Load attribute-based classes
+        const attributePromises = Object.keys(Attribute).map(async (attr) => {
+          const classes = await getClassesByAttribute(attr);
+          newClassData[attr] = classes;
+          return { attr, classes };
+        });
+        
+        // Load course selection classes
+        const courseSelectionNodes = Object.values(nodeMap).filter(
+          node => node.chooseNClasses && node.chooseNClasses.length
+        );
+        
+        const courseSelectionPromises = courseSelectionNodes.map(async (node) => {
+          if (node.chooseNClasses && node.chooseNClasses.length) {
+            const courses = await getClassesByCourseIds(node.chooseNClasses);
+            newClassData[`choose_${node.id}`] = courses;
+            return { nodeId: node.id, courses };
+          }
+        });
+        
+        // Wait for all data to load
+        await Promise.all([...attributePromises, ...courseSelectionPromises]);
+        
+        setClassData(newClassData);
+        setFilteredCourseData(newClassData); // Initialize filtered data with full data
+        
+      } catch (error) {
+        console.error("Error loading class data:", error);
+      }
+    };
+    
+    loadClassData();
+  }, [nodeMap]);
 
   // Calculate completed credits when relevant state changes
   useEffect(() => {
     let completed = 0;
     
-    initialTreeData.forEach(node => {
+    Object.values(nodeMap).forEach(node => {
       if (completedNodes[node.id] && node.numberValue && !node.chooseNClasses) {
         completed += node.numberValue;
       } else if (node.numberValue && nodeInputValues[node.id]) {
@@ -187,7 +215,7 @@ const CourseTree = () => {
     });
     
     setCompletedCredits(completed);
-  }, [completedNodes, nodeInputValues, completedClasses, filteredCourseData]);
+  }, [completedNodes, nodeInputValues, completedClasses, filteredCourseData, nodeMap]);
 
   // Scroll to selected node
   useEffect(() => {
@@ -201,21 +229,43 @@ const CourseTree = () => {
 
   // Filter course data when search terms change
   useEffect(() => {
-    const newFilteredData = { ...dummyClassData };
+    const newFilteredData = { ...classData };
     
     Object.keys(courseSearchTerms).forEach(key => {
       const searchTerm = courseSearchTerms[key].toLowerCase().trim();
-      if (searchTerm && dummyClassData[key]) {
-        newFilteredData[key] = dummyClassData[key].filter(course => 
-          course.name.toLowerCase().includes(searchTerm) || 
-          course.code.toLowerCase().includes(searchTerm) ||
-          course.professor.toLowerCase().includes(searchTerm)
+      if (searchTerm && classData[key]) {
+        newFilteredData[key] = classData[key].filter(course => 
+          (course.name && course.name.toLowerCase().includes(searchTerm)) || 
+          (course.code && course.code.toLowerCase().includes(searchTerm)) ||
+          (course.instructor && course.instructor.toLowerCase().includes(searchTerm))
         );
       }
     });
     
     setFilteredCourseData(newFilteredData);
-  }, [courseSearchTerms, dummyClassData]);
+  }, [courseSearchTerms, classData]);
+
+  // Handle global search
+  useEffect(() => {
+    const handleSearch = async () => {
+      if (!searchTerm.trim()) {
+        setSearchResults([]);
+        return;
+      }
+      
+      try {
+        const results = await searchClasses(searchTerm);
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Error searching classes:", error);
+        setSearchResults([]);
+      }
+    };
+    
+    // Debounce search to avoid too many API calls
+    const debounceTimeout = setTimeout(handleSearch, 300);
+    return () => clearTimeout(debounceTimeout);
+  }, [searchTerm]);
 
   // Handle node expansion toggle
   const toggleExpand = (nodeId) => {
@@ -252,7 +302,7 @@ const CourseTree = () => {
         };
       } else {
         // Check if we've already selected the max number
-        const node = initialTreeData.find(n => n.id === nodeId);
+        const node = nodeMap[nodeId];
         if (node && node.numberValue && currentSelected.length >= node.numberValue) {
           // Replace the oldest selection
           return {
@@ -269,7 +319,7 @@ const CourseTree = () => {
     });
   };
 
-  // New function to toggle class completion status
+  // Toggle class completion status
   const toggleClassCompletion = (attribute, classId) => {
     setCompletedClasses(prev => {
       const currentCompleted = prev[attribute] || [];
@@ -285,19 +335,11 @@ const CourseTree = () => {
         };
       }
     });
-    
-    // Update node input values for related attribute nodes
-    initialTreeData.forEach(node => {
-      if (node.attributes && node.attributes.includes(attribute)) {
-        // We'll update these values in the useEffect for credits calculation
-        // This ensures we're reflecting completed classes in the progress UI
-      }
-    });
   };
 
   // Handle input change for number value nodes
   const handleInputChange = (nodeId, value) => {
-    const node = initialTreeData.find(n => n.id === nodeId);
+    const node = nodeMap[nodeId];
     let numValue = parseInt(value) || 0;
     
     // Ensure the value is not negative
@@ -417,6 +459,16 @@ const CourseTree = () => {
             </div>
           </div>
         </header>
+        
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-700">Loading degree data...</p>
+            </div>
+          </div>
+        )}
         
         {/* Main Content */}
         <div className="flex flex-1 overflow-hidden">
@@ -566,6 +618,7 @@ const CourseTree = () => {
                 handleNodeClick={handleNodeClick}
                 setHoveredNode={setHoveredNode}
                 nodeRefs={nodeRefs}
+                viewMode={viewMode}
               />
             </div>
             

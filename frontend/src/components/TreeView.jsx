@@ -9,9 +9,11 @@ import {
   getNodeStatusClass, 
   getNodeStatusIcon, 
   renderAttributeTag, 
-  AttributeColors, 
-  Attribute
+  AttributeColors
 } from './utils';
+
+// Import the Attribute enum from the API
+import { Attribute } from '../services/api';
 
 const TreeView = ({
   treeData,
@@ -38,7 +40,8 @@ const TreeView = ({
   handleCourseSearchChange,
   handleNodeClick,
   setHoveredNode,
-  nodeRefs
+  nodeRefs,
+  viewMode
 }) => {
   // Render attribute-based course browser
   const renderAttributeCourseBrowser = (node, attribute) => {
@@ -63,7 +66,7 @@ const TreeView = ({
               <Search className="ml-2 text-gray-400" size={18} />
               <input
                 type="text"
-                placeholder="Search courses by name, code, or professor..."
+                placeholder="Search courses by name, code, or instructor..."
                 className="w-full py-2 px-3 border-none bg-transparent focus:outline-none"
                 value={searchTerm}
                 onChange={(e) => handleCourseSearchChange(attribute, e.target.value)}
@@ -98,20 +101,24 @@ const TreeView = ({
                           <div className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
                             {course.credits} credits
                           </div>
-                          <div className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                            {course.rating}
-                          </div>
-                          {course.attributes && course.attributes.map(attr => (
-                            AttributeColors[attr] && (
-                              <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attr].bg} ${AttributeColors[attr].text} ${AttributeColors[attr].border}`}>
-                                {AttributeColors[attr].icon}
-                                <span className="ml-1">{Attribute[attr]}</span>
+                          {course.instructorAvg && (
+                            <div className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                              {course.instructorAvg.toFixed(1)}
+                            </div>
+                          )}
+                          {course.attributes && course.attributes.map(attr => {
+                            // Convert API attribute format (e.g., "A&H") to internal key (e.g., "AH")
+                            const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attr);
+                            return attrKey && AttributeColors[attrKey] && (
+                              <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
+                                {AttributeColors[attrKey].icon}
+                                <span className="ml-1">{attr}</span>
                               </div>
                             )
-                          ))}
+                          })}
                           
                           {/* Action buttons */}
                           <div className="flex gap-2">
@@ -152,37 +159,30 @@ const TreeView = ({
                       <div className="text-sm text-gray-600 mt-2 grid grid-cols-2 gap-2">
                         <div className="flex items-center">
                           <Users size={14} className="mr-1 flex-shrink-0" /> 
-                          <span className="truncate">{course.professor}</span>
+                          <span className="truncate">{course.instructor}</span>
                         </div>
-                        <div className="flex items-center">
-                          <Calendar size={14} className="mr-1 flex-shrink-0" /> 
-                          <span className="truncate">{course.days.join(", ")}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Clock size={14} className="mr-1 flex-shrink-0" /> 
-                          <span className="truncate">{course.time}</span>
-                        </div>
-                        <div className="flex items-center">
-                          <Info size={14} className="mr-1 flex-shrink-0" /> 
-                          <span className="truncate">{course.location}</span>
-                        </div>
+                        {course.days && (
+                          <div className="flex items-center">
+                            <Calendar size={14} className="mr-1 flex-shrink-0" /> 
+                            <span className="truncate">{course.days}</span>
+                          </div>
+                        )}
+                        {course.time && (
+                          <div className="flex items-center">
+                            <Clock size={14} className="mr-1 flex-shrink-0" /> 
+                            <span className="truncate">{course.time}</span>
+                          </div>
+                        )}
+                        {course.location && (
+                          <div className="flex items-center">
+                            <Info size={14} className="mr-1 flex-shrink-0" /> 
+                            <span className="truncate">{course.location}</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="mt-2 text-xs text-gray-500 flex items-center">
-                        <span className="mr-2">Enrollment:</span>
-                        <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                          <div 
-                            className={`h-1.5 ${
-                              (course.enrolled / course.capacity) > 0.85 
-                                ? 'bg-red-500' 
-                                : (course.enrolled / course.capacity) > 0.6 
-                                  ? 'bg-yellow-500' 
-                                  : 'bg-green-500'
-                            }`}
-                            style={{ width: `${(course.enrolled / course.capacity) * 100}%` }}
-                          ></div>
-                        </div>
-                        <span className="ml-2">{course.enrolled}/{course.capacity}</span>
-                      </div>
+                      {course.description && (
+                        <div className="mt-3 text-sm text-gray-600 line-clamp-2">{course.description}</div>
+                      )}
                       
                       {/* Completion status indicator */}
                       {isCompleted && (
@@ -191,8 +191,6 @@ const TreeView = ({
                           <span>Completed</span>
                         </div>
                       )}
-                      
-                      <div className="mt-3 text-sm text-gray-600 line-clamp-2">{course.description}</div>
                     </div>
                   );
                 })}
@@ -227,7 +225,7 @@ const TreeView = ({
     // Node type determination
     const nodeType = getNodeType(node);
     const isExpanded = expandedNodes[node.id];
-    const hasChildren = node.children && node.children.length > 0;
+    const hasChildren = node.preRecs && node.preRecs.length > 0;
     const statusClass = getNodeStatusClass(node, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
     const statusIcon = getNodeStatusIcon(node, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
     const isCompleted = getNodeStatusIcon(node, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap).props.className.includes("green");
@@ -322,7 +320,7 @@ const TreeView = ({
           {/* Connection lines for children */}
           {hasChildren && isExpanded && (
             <div className="absolute left-6 top-full w-0.5 bg-gray-300 rounded" 
-              style={{ height: `${node.children.length * 20}px` }}>
+              style={{ height: `${node.preRecs.length * 20}px` }}>
             </div>
           )}
           
@@ -482,31 +480,37 @@ const TreeView = ({
                             onClick={(e) => { e.stopPropagation(); toggleClassSelection(node.id, course.id); }}
                           >
                             <div>
-                              <div className="font-medium">{course.code}: {course.name}</div>
+                              <div className="font-medium">{course.code}: {course.name || ''}</div>
                               <div className="text-sm text-gray-600 mt-1 flex items-center flex-wrap gap-2">
                                 <span className="flex items-center">
-                                  <Users size={14} className="mr-1" /> {course.professor}
+                                  <Users size={14} className="mr-1" /> {course.instructor}
                                 </span>
-                                <span className="flex items-center">
-                                  <Calendar size={14} className="mr-1" /> {course.days.join(", ")}
-                                </span>
-                                <span className="flex items-center">
-                                  <Clock size={14} className="mr-1" /> {course.time}
-                                </span>
+                                {course.days && (
+                                  <span className="flex items-center">
+                                    <Calendar size={14} className="mr-1" /> {course.days}
+                                  </span>
+                                )}
+                                {course.time && (
+                                  <span className="flex items-center">
+                                    <Clock size={14} className="mr-1" /> {course.time}
+                                  </span>
+                                )}
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
                               <div className="px-2 py-1 rounded bg-gray-100 text-sm">
                                 <span className="font-medium">{course.credits}</span> credits
                               </div>
-                              {course.attributes && course.attributes.map(attr => (
-                                AttributeColors[attr] && (
-                                  <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attr].bg} ${AttributeColors[attr].text} ${AttributeColors[attr].border}`}>
-                                    {AttributeColors[attr].icon}
-                                    <span className="ml-1">{Attribute[attr]}</span>
+                              {course.attributes && course.attributes.map(attr => {
+                                // Convert API attribute format to internal key
+                                const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attr);
+                                return attrKey && AttributeColors[attrKey] && (
+                                  <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
+                                    {AttributeColors[attrKey].icon}
+                                    <span className="ml-1">{attr}</span>
                                   </div>
                                 )
-                              ))}
+                              })}
                               <div className={`w-6 h-6 rounded-full transition-colors ${
                                 selectedClasses[node.id]?.includes(course.id) 
                                   ? 'bg-blue-500 text-white' 
@@ -543,21 +547,58 @@ const TreeView = ({
         {/* Children nodes */}
         {isExpanded && hasChildren && (
           <div className="pl-10 mt-2 space-y-2">
-            {node.children.map(child => {
+            {node.preRecs.map(childIdOrNode => {
+              // Handle both ID references and Node objects
+              const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+              const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+              
+              if (!childNode) return null;
+              
               // For dropdown nodes, only show children if a selection has been made
               if (nodeType === "dropdown") {
                 // Only render the selected child
-                if (selectedSpecialization[node.id] === child.id) {
-                  return renderModernNode(child, level + 1);
+                if (selectedSpecialization[node.id] === childId) {
+                  return renderModernNode(childNode, level + 1);
                 }
                 return null;
               }
-              return renderModernNode(child, level + 1);
+              return renderModernNode(childNode, level + 1);
             })}
           </div>
         )}
       </div>
     );
+  };
+
+  // Render compact view of nodes
+  const renderCompactNode = (node, level = 0) => {
+    if (!node) return null;
+    
+    // The compact view logic would go here, similar to renderModernNode but more condensed
+    // For now we're just using the modern view for all modes
+    return renderModernNode(node, level);
+  };
+
+  // Render detailed view of nodes
+  const renderDetailedNode = (node, level = 0) => {
+    if (!node) return null;
+    
+    // The detailed view logic would go here, similar to renderModernNode but with more details
+    // For now we're just using the modern view for all modes
+    return renderModernNode(node, level);
+  };
+
+  // Choose the appropriate render function based on view mode
+  const renderNode = (node, level = 0) => {
+    switch (viewMode) {
+      case "compact":
+        return renderCompactNode(node, level);
+      case "detailed":
+        return renderDetailedNode(node, level);
+      case "modern":
+      default:
+        return renderModernNode(node, level);
+    }
   };
 
   return (
@@ -569,7 +610,7 @@ const TreeView = ({
         transition: 'transform 0.3s ease',
       }}
     >
-      {treeData.map(node => renderModernNode(node))}
+      {treeData.map(node => renderNode(node))}
     </div>
   );
 };
