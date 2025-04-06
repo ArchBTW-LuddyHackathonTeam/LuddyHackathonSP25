@@ -15,6 +15,62 @@ import {
 // Import the Attribute enum from the API
 import { Attribute } from '../services/api';
 
+// Helper function to extract attribute values correctly
+const extractAttributeValue = (attribute) => {
+  // If attribute is a string, return it directly
+  if (typeof attribute === 'string') {
+    return attribute;
+  }
+  
+  // If attribute is an object, try to extract a usable string value
+  if (attribute && typeof attribute === 'object') {
+    // Most likely candidates for the actual value
+    if (attribute.value !== undefined) return attribute.value;
+    if (attribute.code !== undefined) return attribute.code;
+    if (attribute.name !== undefined) return attribute.name;
+    if (attribute.id !== undefined) return attribute.id;
+    if (attribute.key !== undefined) return attribute.key;
+    
+    // If none of the above properties exist, check for any string property
+    for (const key of Object.keys(attribute)) {
+      if (typeof attribute[key] === 'string') {
+        return attribute[key];
+      }
+    }
+    
+    // Last resort: return a common attribute code
+    return 'EC'; // This should be replaced with a valid attribute in your system
+  }
+  
+  // Fallback for null/undefined
+  return '';
+};
+
+// Updated function to get attribute key from value, handling both strings and objects
+const getAttributeKey = (attributeValue) => {
+  // Extract a usable string from the attribute (which might be an object)
+  const extractedValue = extractAttributeValue(attributeValue);
+  
+  // Now try to map this value to an attribute key
+  // First, check for direct match
+  let key = Object.keys(Attribute).find(k => Attribute[k] === extractedValue);
+  
+  // If no direct match, try case-insensitive comparison
+  if (!key) {
+    key = Object.keys(Attribute).find(k => 
+      Attribute[k].toLowerCase() === extractedValue.toLowerCase()
+    );
+  }
+  
+  // If still no match, check if the extracted value itself is a valid key
+  if (!key && Object.keys(Attribute).includes(extractedValue)) {
+    key = extractedValue;
+  }
+  
+  // If all else fails, just use the extracted value
+  return key || extractedValue;
+};
+
 const TreeView = ({
   treeData,
   expandedNodes,
@@ -43,12 +99,36 @@ const TreeView = ({
   nodeRefs,
   viewMode
 }) => {
-  // Render attribute-based course browser
-  const renderAttributeCourseBrowser = (node, attribute) => {
-    const courseKey = `attr_${node.id}_${attribute}`;
+  // Render attribute-based course browser with fixed attribute handling
+  const renderAttributeCourseBrowser = (node, attributeValue) => {
+    if (!attributeValue) {
+      return (
+        <div className="mt-3 p-3 bg-red-50 text-red-700 rounded-lg border border-red-200">
+          Error: Missing attribute data
+        </div>
+      );
+    }
+    
+    // Extract the attribute key correctly, handling object or string values
+    const attributeKey = getAttributeKey(attributeValue);
+    
+    // Try the exact key first
+    let courses = filteredCourseData[attributeKey] || [];
+    
+    // If no courses found with the exact key, try a case-insensitive match
+    if (courses.length === 0) {
+      const matchingKey = Object.keys(filteredCourseData).find(
+        key => key.toLowerCase() === attributeKey.toLowerCase()
+      );
+      
+      if (matchingKey) {
+        courses = filteredCourseData[matchingKey] || [];
+      }
+    }
+    
+    const courseKey = `attr_${node.id}_${attributeKey}`;
     const isExpanded = expandedCourses[courseKey];
-    const searchTerm = courseSearchTerms[attribute] || "";
-    const courses = filteredCourseData[attribute] || [];
+    const searchTerm = courseSearchTerms[attributeKey] || "";
     
     return (
       <div className="mt-3">
@@ -56,7 +136,9 @@ const TreeView = ({
           onClick={(e) => { e.stopPropagation(); toggleCourseExpand(courseKey); }}
           className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg flex justify-between items-center border border-gray-200 transition-colors duration-150"
         >
-          <span className="font-medium">Browse compatible courses</span>
+          <span className="font-medium">
+            Browse compatible courses {courses.length > 0 ? `(${courses.length} found)` : ''}
+          </span>
           {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
         </button>
         
@@ -69,23 +151,24 @@ const TreeView = ({
                 placeholder="Search courses by name, code, or instructor..."
                 className="w-full py-2 px-3 border-none bg-transparent focus:outline-none"
                 value={searchTerm}
-                onChange={(e) => handleCourseSearchChange(attribute, e.target.value)}
+                onChange={(e) => handleCourseSearchChange(attributeKey, e.target.value)}
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
             
             {courses.length === 0 ? (
-              <div className="text-center py-6 text-gray-500">
-                No courses found matching your search.
+              <div className="text-center py-6 text-gray-500 flex flex-col items-center">
+                <Info size={24} className="mb-2 text-gray-400" />
+                <p>No courses found for attribute <span className="font-medium">{extractAttributeValue(attributeValue)}</span></p>
+                <p className="text-sm text-gray-400 mt-1">Attribute key used: {attributeKey}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
                 {courses.map(course => {
                   // Check if this course is selected for this node
                   const isSelected = course.id && selectedClasses[node.id]?.includes(course.id);
-
                   // Check if course is completed
-                  const isCompleted = completedClasses[attribute]?.includes(course.id);
+                  const isCompleted = completedClasses[attributeKey]?.includes(course.id);
                   
                   return (
                     <div 
@@ -96,9 +179,8 @@ const TreeView = ({
                         isCompleted ? 'border-green-500 bg-green-50' : ''
                       }`}
                     >
-                      {/* Rest of your course rendering code... */}
                       <div className="flex justify-between items-start">
-                        <div className="font-medium">{course.code}: {course.name}</div>
+                        <div className="font-medium">{course.code}: {course.name || course.description}</div>
                         <div className="flex items-center gap-2">
                           <div className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
                             {course.credits} credits
@@ -111,10 +193,50 @@ const TreeView = ({
                               {course.instructorAvg.toFixed(1)}
                             </div>
                           )}
-                          {/* Rest of your rendering code... */}
                         </div>
                       </div>
-                      {/* Continue with the rest of the course card content... */}
+                      <div className="mt-2 text-sm text-gray-600">
+                        {course.description}
+                      </div>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 flex items-center">
+                          <Users size={14} className="mr-1" /> {course.instructor}
+                        </div>
+                        {course.instructionMode && (
+                          <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 flex items-center">
+                            <BookOpen size={14} className="mr-1" /> {course.instructionMode}
+                          </div>
+                        )}
+                        {course.time && (
+                          <div className="px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-800 flex items-center">
+                            <Clock size={14} className="mr-1" /> {course.time}
+                          </div>
+                        )}
+                      </div>
+                      <div className="mt-3 flex justify-between items-center">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleClassSelection(node.id, course.id, attributeKey);
+                          }}
+                          className={`px-3 py-1 text-sm rounded-md ${
+                            isSelected ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          } transition-colors`}
+                        >
+                          {isSelected ? 'Selected' : 'Select'}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleClassCompletion(attributeKey, course.id);
+                          }}
+                          className={`px-3 py-1 text-sm rounded-md ${
+                            isCompleted ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          } transition-colors`}
+                        >
+                          {isCompleted ? 'Completed' : 'Mark Complete'}
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -126,7 +248,6 @@ const TreeView = ({
     );
   };
 
-  // Render modern view of a node
   const renderModernNode = (node, level = 0) => {
     if (!node) return null;
     
@@ -134,7 +255,6 @@ const TreeView = ({
     const isSpecializationOption = Object.values(nodeMap).some(n => 
       n.dropdownChildren && n.preRecs && n.preRecs.includes(node.id)
     );
-
     // If this is a specialization option that's not selected, don't render it
     const parentNode = Object.values(nodeMap).find(n => 
       n.dropdownChildren && n.preRecs && n.preRecs.includes(node.id)
@@ -145,7 +265,6 @@ const TreeView = ({
         selectedSpecialization[parentNode.id] !== node.id) {
       return null;
     }
-
     // Node type determination
     const nodeType = getNodeType(node);
     const isExpanded = expandedNodes[node.id];
@@ -165,8 +284,9 @@ const TreeView = ({
     let attributeCreditsFromCompleted = 0;
     
     if ((nodeType === "attribute" || nodeType === "attribute-with-number") && node.attributes) {
-      const attr = node.attributes[0];
-      const courses = filteredCourseData[attr] || [];
+      const attributeValue = node.attributes[0];
+      const attributeKey = getAttributeKey(attributeValue);
+      const courses = filteredCourseData[attributeKey] || [];
       
       // Credits from selected classes
       if (selectedClasses[node.id]) {
@@ -177,8 +297,8 @@ const TreeView = ({
       }
       
       // Credits from completed classes
-      if (completedClasses[attr]) {
-        attributeCreditsFromCompleted = completedClasses[attr].reduce((total, classId) => {
+      if (completedClasses[attributeKey]) {
+        attributeCreditsFromCompleted = completedClasses[attributeKey].reduce((total, classId) => {
           const course = courses.find(c => c.id === classId);
           return total + (course ? course.credits : 0);
         }, 0);
@@ -190,20 +310,21 @@ const TreeView = ({
     const progress = totalValue 
       ? Math.min(100, Math.max(0, ((inputValue + attributeCreditsFromClasses + attributeCreditsFromCompleted) / totalValue) * 100))
       : 0;
-
+    
     // Class data for attribute or choose nodes
     let classData = [];
     let courseKey = "";
     
     if (nodeType === "attribute" || nodeType === "attribute-with-number") {
-      const attr = node.attributes[0];
-      classData = filteredCourseData[attr] || [];
-      courseKey = attr;
+      const attributeValue = node.attributes[0];
+      const attributeKey = getAttributeKey(attributeValue);
+      classData = filteredCourseData[attributeKey] || [];
+      courseKey = attributeKey;
     } else if (nodeType === "choose") {
       classData = filteredCourseData[`choose_${node.id}`] || [];
       courseKey = `choose_${node.id}`;
     }
-
+    
     // Base card classes
     let cardClasses = `relative transition-all duration-200 rounded-xl border-2 p-4 mb-4 ${statusClass} `;
     
@@ -218,7 +339,7 @@ const TreeView = ({
     if (isCompleted) {
       cardClasses += "border-green-500 ";
     }
-
+    
     return (
       <div 
         key={node.id} 
@@ -267,13 +388,12 @@ const TreeView = ({
                   {nodeType === "course" ? formatCourseName(node.titleValue) : node.titleValue}
                 </h3>
               </div>
-
               {/* Attribute tags */}
               {(nodeType === "attribute" || nodeType === "attribute-with-number") && node.attributes && (
                 <div className="flex flex-wrap gap-1 mt-2">
                   {node.attributes.map((attr, index) => (
-                    <div key={`${attr}-${index}`}>
-                      {renderAttributeTag(attr)}
+                    <div key={`${extractAttributeValue(attr)}-${index}`}>
+                      {renderAttributeTag(extractAttributeValue(attr))}
                     </div>
                   ))}
                 </div>
@@ -323,7 +443,7 @@ const TreeView = ({
                         <span>+ {attributeCreditsFromClasses} credits from selected courses</span>
                       </div>
                     )}
-                    {node.attributes && completedClasses[node.attributes[0]]?.length > 0 && (
+                    {node.attributes && completedClasses[getAttributeKey(node.attributes[0])]?.length > 0 && (
                       <div className="text-green-600">
                         <span>+ {attributeCreditsFromCompleted} credits from completed courses</span>
                       </div>
@@ -461,12 +581,14 @@ const TreeView = ({
                                 <span className="font-medium">{course.credits}</span> credits
                               </div>
                               {course.attributes && course.attributes.map((attr, attrIndex) => {
+                                // Handle attribute being an object or string
+                                const attrValue = typeof attr === 'object' ? extractAttributeValue(attr) : attr;
                                 // Convert API attribute format to internal key
-                                const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attr);
+                                const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attrValue);
                                 return attrKey && AttributeColors[attrKey] && (
-                                  <div key={`${attr}-${attrIndex}`} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
+                                  <div key={`${attrValue}-${attrIndex}`} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
                                     {AttributeColors[attrKey].icon}
-                                    <span className="ml-1">{attr}</span>
+                                    <span className="ml-1">{attrValue}</span>
                                   </div>
                                 )
                               })}
