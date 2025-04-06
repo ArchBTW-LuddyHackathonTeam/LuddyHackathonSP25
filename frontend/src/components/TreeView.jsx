@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { 
   ChevronDown, ChevronRight, CheckCircle, Users, Calendar, 
-  Clock, Search, Info
+  Clock, Search, Info, Check, BookOpen
 } from 'lucide-react';
 import { 
   getNodeType, 
@@ -19,6 +19,7 @@ const TreeView = ({
   expandedCourses,
   completedNodes,
   selectedClasses,
+  completedClasses,
   nodeInputValues,
   selectedSpecialization,
   selectedNode,
@@ -31,6 +32,7 @@ const TreeView = ({
   toggleCourseExpand,
   toggleComplete,
   toggleClassSelection,
+  toggleClassCompletion,
   handleInputChange,
   handleSpecializationChange,
   handleCourseSearchChange,
@@ -75,70 +77,125 @@ const TreeView = ({
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
-                {courses.map(course => (
-                  <div 
-                    key={course.id} 
-                    className="border rounded-lg p-3 bg-white hover:shadow-md transition-shadow duration-200"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="font-medium">{course.code}: {course.name}</div>
-                      <div className="flex items-center gap-2">
-                        <div className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
-                          {course.credits} credits
+                {courses.map(course => {
+                  // Check if this course is selected for this node
+                  const isSelected = selectedClasses[node.id]?.includes(course.id);
+                  // Check if course is completed
+                  const isCompleted = completedClasses[attribute]?.includes(course.id);
+                  
+                  return (
+                    <div 
+                      key={course.id} 
+                      className={`border rounded-lg p-3 bg-white hover:shadow-md transition-shadow duration-200 ${
+                        isSelected ? 'border-blue-500 bg-blue-50' : ''
+                      } ${
+                        isCompleted ? 'border-green-500 bg-green-50' : ''
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="font-medium">{course.code}: {course.name}</div>
+                        <div className="flex items-center gap-2">
+                          <div className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
+                            {course.credits} credits
+                          </div>
+                          <div className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                            </svg>
+                            {course.rating}
+                          </div>
+                          {course.attributes && course.attributes.map(attr => (
+                            AttributeColors[attr] && (
+                              <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attr].bg} ${AttributeColors[attr].text} ${AttributeColors[attr].border}`}>
+                                {AttributeColors[attr].icon}
+                                <span className="ml-1">{Attribute[attr]}</span>
+                              </div>
+                            )
+                          ))}
+                          
+                          {/* Action buttons */}
+                          <div className="flex gap-2">
+                            {/* Selection button for adding to plan */}
+                            <button
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                                isSelected 
+                                  ? 'bg-blue-500 text-white hover:bg-blue-600' 
+                                  : 'bg-gray-200 hover:bg-gray-300'
+                              }`}
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                toggleClassSelection(node.id, course.id, attribute);
+                              }}
+                              title="Select for degree plan"
+                            >
+                              {isSelected ? <Check size={16} /> : <BookOpen size={16} />}
+                            </button>
+                            
+                            {/* Completion button for marking as completed */}
+                            <button
+                              className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                                isCompleted 
+                                  ? 'bg-green-500 text-white hover:bg-green-600' 
+                                  : 'bg-gray-200 hover:bg-gray-300'
+                              }`}
+                              onClick={(e) => { 
+                                e.stopPropagation(); 
+                                toggleClassCompletion(attribute, course.id);
+                              }}
+                              title="Mark as completed"
+                            >
+                              <CheckCircle size={16} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 flex items-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          {course.rating}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-2 grid grid-cols-2 gap-2">
+                        <div className="flex items-center">
+                          <Users size={14} className="mr-1 flex-shrink-0" /> 
+                          <span className="truncate">{course.professor}</span>
                         </div>
-                        {course.attributes && course.attributes.map(attr => (
-                          AttributeColors[attr] && (
-                            <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attr].bg} ${AttributeColors[attr].text} ${AttributeColors[attr].border}`}>
-                              {AttributeColors[attr].icon}
-                              <span className="ml-1">{Attribute[attr]}</span>
-                            </div>
-                          )
-                        ))}
+                        <div className="flex items-center">
+                          <Calendar size={14} className="mr-1 flex-shrink-0" /> 
+                          <span className="truncate">{course.days.join(", ")}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Clock size={14} className="mr-1 flex-shrink-0" /> 
+                          <span className="truncate">{course.time}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <Info size={14} className="mr-1 flex-shrink-0" /> 
+                          <span className="truncate">{course.location}</span>
+                        </div>
                       </div>
+                      <div className="mt-2 text-xs text-gray-500 flex items-center">
+                        <span className="mr-2">Enrollment:</span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
+                          <div 
+                            className={`h-1.5 ${
+                              (course.enrolled / course.capacity) > 0.85 
+                                ? 'bg-red-500' 
+                                : (course.enrolled / course.capacity) > 0.6 
+                                  ? 'bg-yellow-500' 
+                                  : 'bg-green-500'
+                            }`}
+                            style={{ width: `${(course.enrolled / course.capacity) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="ml-2">{course.enrolled}/{course.capacity}</span>
+                      </div>
+                      
+                      {/* Completion status indicator */}
+                      {isCompleted && (
+                        <div className="mt-2 flex items-center text-green-600 text-sm">
+                          <CheckCircle size={14} className="mr-1" />
+                          <span>Completed</span>
+                        </div>
+                      )}
+                      
+                      <div className="mt-3 text-sm text-gray-600 line-clamp-2">{course.description}</div>
                     </div>
-                    <div className="text-sm text-gray-600 mt-2 grid grid-cols-2 gap-2">
-                      <div className="flex items-center">
-                        <Users size={14} className="mr-1 flex-shrink-0" /> 
-                        <span className="truncate">{course.professor}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar size={14} className="mr-1 flex-shrink-0" /> 
-                        <span className="truncate">{course.days.join(", ")}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Clock size={14} className="mr-1 flex-shrink-0" /> 
-                        <span className="truncate">{course.time}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <Info size={14} className="mr-1 flex-shrink-0" /> 
-                        <span className="truncate">{course.location}</span>
-                      </div>
-                    </div>
-                    <div className="mt-2 text-xs text-gray-500 flex items-center">
-                      <span className="mr-2">Enrollment:</span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                        <div 
-                          className={`h-1.5 ${
-                            (course.enrolled / course.capacity) > 0.85 
-                              ? 'bg-red-500' 
-                              : (course.enrolled / course.capacity) > 0.6 
-                                ? 'bg-yellow-500' 
-                                : 'bg-green-500'
-                          }`}
-                          style={{ width: `${(course.enrolled / course.capacity) * 100}%` }}
-                        ></div>
-                      </div>
-                      <span className="ml-2">{course.enrolled}/{course.capacity}</span>
-                    </div>
-                    <div className="mt-3 text-sm text-gray-600 line-clamp-2">{course.description}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -180,8 +237,36 @@ const TreeView = ({
     // Status determination for specific node types
     const selectedCount = nodeType === "choose" ? (selectedClasses[node.id]?.length || 0) : 0;
     const inputValue = parseInt(nodeInputValues[node.id] || '0');
-    const progress = (nodeType === "number" || nodeType === "attribute-with-number") && node.numberValue 
-      ? Math.min(100, Math.max(0, (inputValue / node.numberValue) * 100))
+    
+    // For attribute nodes, calculate completed credits from selected classes and completed classes
+    let attributeCreditsFromClasses = 0;
+    let attributeCreditsFromCompleted = 0;
+    
+    if ((nodeType === "attribute" || nodeType === "attribute-with-number") && node.attributes) {
+      const attr = node.attributes[0];
+      const courses = filteredCourseData[attr] || [];
+      
+      // Credits from selected classes
+      if (selectedClasses[node.id]) {
+        attributeCreditsFromClasses = selectedClasses[node.id].reduce((total, classId) => {
+          const course = courses.find(c => c.id === classId);
+          return total + (course ? course.credits : 0);
+        }, 0);
+      }
+      
+      // Credits from completed classes
+      if (completedClasses[attr]) {
+        attributeCreditsFromCompleted = completedClasses[attr].reduce((total, classId) => {
+          const course = courses.find(c => c.id === classId);
+          return total + (course ? course.credits : 0);
+        }, 0);
+      }
+    }
+    
+    // Combined progress calculation
+    const totalValue = nodeType === "number" || nodeType === "attribute-with-number" ? node.numberValue : 0;
+    const progress = totalValue 
+      ? Math.min(100, Math.max(0, ((inputValue + attributeCreditsFromClasses + attributeCreditsFromCompleted) / totalValue) * 100))
       : 0;
 
     // Class data for attribute or choose nodes
@@ -303,6 +388,22 @@ const TreeView = ({
                   </div>
                   <span className="font-medium">{Math.round(progress)}%</span>
                 </div>
+                
+                {/* Display credit total from selected and completed courses if applicable */}
+                {(nodeType === "attribute-with-number") && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    {selectedClasses[node.id]?.length > 0 && (
+                      <div>
+                        <span>+ {attributeCreditsFromClasses} credits from selected courses</span>
+                      </div>
+                    )}
+                    {node.attributes && completedClasses[node.attributes[0]]?.length > 0 && (
+                      <div className="text-green-600">
+                        <span>+ {attributeCreditsFromCompleted} credits from completed courses</span>
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 {/* Animated progress bar */}
                 <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">

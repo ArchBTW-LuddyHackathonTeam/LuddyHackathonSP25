@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Bot, Send, PenTool } from 'lucide-react';
+import { useAssistant } from '../services/AssistantContext';
 
 const Assistant = ({
   assistantMessages,
@@ -9,6 +10,8 @@ const Assistant = ({
   sendAssistantMessage
 }) => {
   const messagesEndRef = useRef(null);
+  // Get the sendMessageWithUserData function from context
+  const { sendMessageWithUserData } = useAssistant();
 
   // Auto-scroll to bottom of messages
   useEffect(() => {
@@ -16,6 +19,17 @@ const Assistant = ({
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [assistantMessages]);
+
+  // Handle sending message - using both your original function and our context function
+  const handleSendMessage = () => {
+    if (!userMessage.trim() || isAssistantTyping) return;
+    
+    // Call the context function to store the message history with user data
+    sendMessageWithUserData(userMessage);
+    
+    // Also call your original function to handle the UI and generate a response
+    sendAssistantMessage();
+  };
 
   return (
     <div className="flex flex-col h-full">
@@ -83,7 +97,7 @@ const Assistant = ({
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
-                    sendAssistantMessage();
+                    handleSendMessage();
                   }
                 }}
                 rows={3}
@@ -94,7 +108,7 @@ const Assistant = ({
             </div>
             <button
               className="ml-2 px-4 py-3 bg-blue-500 text-white rounded-lg flex items-center justify-center hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
-              onClick={sendAssistantMessage}
+              onClick={handleSendMessage}
               disabled={!userMessage.trim() || isAssistantTyping}
             >
               <Send size={20} />

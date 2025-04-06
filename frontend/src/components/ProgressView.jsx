@@ -6,6 +6,7 @@ const ProgressView = ({
   completedNodes,
   nodeInputValues,
   selectedClasses,
+  completedClasses,
   selectedSpecialization,
   totalCredits,
   completedCredits,
@@ -20,6 +21,24 @@ const ProgressView = ({
   const getProgressPercentage = () => {
     if (totalCredits === 0) return 0;
     return Math.min(100, Math.max(0, (completedCredits / totalCredits) * 100));
+  };
+
+  // Calculate credits completed for a specific attribute
+  const getAttributeCompletedCredits = (attribute) => {
+    const attrClasses = completedClasses[attribute] || [];
+    let credits = 0;
+    
+    // Only calculate if we have courses in the nodeMap for this attribute
+    const nodeWithAttr = Object.values(nodeMap).find(node => 
+      node.attributes && node.attributes.includes(attribute)
+    );
+    
+    if (nodeWithAttr && attrClasses.length > 0) {
+      // We'd need to get actual course data here, but for now just estimate
+      credits = attrClasses.length * 3; // Assuming 3 credits per course 
+    }
+    
+    return credits;
   };
 
   // Organize nodes by categories
@@ -69,7 +88,16 @@ const ProgressView = ({
               
               if (nodeType === "number" || nodeType === "attribute-with-number") {
                 const inputValue = parseInt(nodeInputValues[child.id]) || 0;
-                progressValue = child.numberValue ? (inputValue / child.numberValue) * 100 : 0;
+                
+                // Include completed classes for attribute nodes
+                let attributeCredits = 0;
+                if (child.attributes && child.attributes.length > 0) {
+                  const attr = child.attributes[0];
+                  attributeCredits = getAttributeCompletedCredits(attr);
+                }
+                
+                progressValue = child.numberValue ? 
+                  Math.min(100, ((inputValue + attributeCredits) / child.numberValue) * 100) : 0;
               } else if (nodeType === "choose") {
                 const selectedCount = selectedClasses[child.id]?.length || 0;
                 progressValue = child.numberValue ? (selectedCount / child.numberValue) * 100 : 0;
@@ -109,6 +137,14 @@ const ProgressView = ({
                         style={{ width: `${progressValue}%` }}
                       ></div>
                     </div>
+                    
+                    {/* Display completed courses count for attribute nodes */}
+                    {child.attributes && child.attributes.length > 0 && 
+                      completedClasses[child.attributes[0]]?.length > 0 && (
+                        <div className="mt-1 text-xs text-green-600">
+                          {completedClasses[child.attributes[0]].length} courses completed
+                        </div>
+                    )}
                   </div>
                 </div>
               );
