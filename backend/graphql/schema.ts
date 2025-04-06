@@ -97,6 +97,7 @@ type Query {
   departments: [Department!]
   department(id: ID!): Department
   department_name(name: String!): Department
+  department_abbrev(abbrev: String!): [Department!]
 
   instructors: [Instructor!]
   instructor(id: ID!): Instructor

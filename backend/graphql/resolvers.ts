@@ -51,6 +51,7 @@ export const resolvers = {
     departments: () => db.prepare('SELECT * FROM departments').all(),
     department: (_parent: any, { id }: { id: number }) => getById('departments', id),
     department_name: (_parent: any, { name }: { name: string }) => db.prepare("SELECT * FROM departments WHERE name = ?").get(name),
+    department_abbrev: (_paent: any, { abbrev }: { abbrev: string }) => db.prepare("SELECT * FROM departments WHERE abbreviation LIKE ?").all(`%${abbrev}%`),
 
     instructors: () => db.prepare('SELECT * FROM instructors').all(),
     instructor: (_parent: any, { id }: { id: number }) => getById('instructors', id),
