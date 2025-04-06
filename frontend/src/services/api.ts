@@ -319,10 +319,10 @@ export interface AssistantResponse {
 
 /**
  * Send messages to the AI assistant and get a response
- * @param messages - Array of Message objects containing the conversation history
+ * @param input - Array of Message objects containing the conversation history
  * @returns Promise resolving to an assistant response message
  */
-export const sendMessageToAssistant = async (messages: Message[]): Promise<AssistantResponse> => {
+export const sendMessageToAssistant = async (input: Message[]): Promise<AssistantResponse> => {
     return new Promise((resolve, reject) => {
 
       fetch(`${SCHED_ENDPOINT}/prompt`, {
@@ -330,7 +330,7 @@ export const sendMessageToAssistant = async (messages: Message[]): Promise<Assis
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ messages })
+        body: JSON.stringify({ input })
       })
         .then(res => res.json())
         .then(data => resolve({
