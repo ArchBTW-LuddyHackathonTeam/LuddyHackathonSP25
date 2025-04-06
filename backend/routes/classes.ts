@@ -49,7 +49,7 @@ router.get("/", (_req, res) => {
                         : null,
                     instructor: data.instructor.name,
                     instructorAvg: data.instructor.reviews.length > 0
-                        ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0)
+                        ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                         : NaN
                 } as Class
             })
@@ -102,7 +102,7 @@ router.get("/id/:id", (req, res) => {
                     : null,
                 instructor: data.instructor.name,
                 instructorAvg: data.instructor.reviews.length > 0
-                    ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0)
+                    ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                     : NaN
             } as Class
         })
@@ -157,7 +157,7 @@ router.get("/attribute/:attribute", (req, res) => {
                         : null,
                     instructor: data.instructor.name,
                     instructorAvg: data.instructor.reviews.length > 0
-                        ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0)
+                        ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                         : NaN
                 } as Class
             })
