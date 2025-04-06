@@ -75,13 +75,13 @@ type Node {
   id: ID!
   title: String,
   number: Int,
-  course_id: Int,
+  course_id: ID,
   dropdown_children: Boolean,
   department: Department,
   prerequisites: [Node],
   prerequisite_ids: [ID!]
   attributes: [CourseAttribute!],
-  chooseNClasses: [Course!]
+  chooseNClasses: [ID!]
 }
 
 # Users

@@ -211,8 +211,8 @@ export const resolvers = {
     department: (parent: any) =>
       db.prepare('SELECT * FROM departments WHERE id = ?').get(parent.department_id),
 
-    course_id: (parent: any) =>
-      db.prepare('SELECT * FROM courses WHERE id = ?').get(parent.course_id),
+    // course_id: (parent: any) =>
+    //   db.prepare('SELECT * FROM courses WHERE id = ?').get(parent.course_id),
     
     attributes: (parent: any) =>
       db

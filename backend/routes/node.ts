@@ -9,9 +9,7 @@ const query = `query Node($nodeId: ID!) {
     attributes {
       name
     }
-    chooseNClasses {
-      id
-    }
+    chooseNClasses 
     course_id
     dropdown_children
     department {
