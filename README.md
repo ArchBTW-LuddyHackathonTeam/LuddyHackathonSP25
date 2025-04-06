@@ -55,4 +55,4 @@ The development of iGPS++ began with a brainstorming session to define key funct
 7. Start the server
 
         $ npm run start
-
+The frontend service should now be accessible locally at port `3321`, whereas the backend would be at port `3000`.
