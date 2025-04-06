@@ -79,6 +79,7 @@ type Node {
   dropdown_children: Boolean,
   department: Department,
   prerequisites: [Node],
+  prerequisite_ids: [ID!]
   attributes: [CourseAttribute],
   chooseNClasses: [Course]
 }
@@ -113,6 +114,9 @@ type Query {
   users: [User!]
   user(id: ID!): User
   user_username(username: String!): User
+
+  nodes: [Node!]
+  node(id: ID!): Node
 }
 
 # Mutations

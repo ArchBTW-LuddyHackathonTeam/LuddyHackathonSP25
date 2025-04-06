@@ -68,6 +68,9 @@ export const resolvers = {
     users: () => db.prepare("SELECT * FROM users").all(),
     user: (_parent: any, { id }: { id: number }) => getById("users", id),
     user_username: (_parent: any, { username }: { username: string }) => db.prepare("SELECT * FROM users WHERE username = ?").get(username),
+
+    nodes: () => db.prepare("SELECT * FROM nodes").all(),
+    node: (_parent: any, { id }: { id: number }) => db.prepare("SELECT * FROM nodes WHERE id = ?").get(id),
   },
 
   Department: {
@@ -196,6 +199,16 @@ export const resolvers = {
         `
         )
         .all(parent.id),
+
+    prerequisite_ids: (parent: any) => { 
+        const result = db
+            .prepare(
+                `SELECT prerequisite_node_id FROM node_prerequisites WHERE node_id = ?`
+            )
+            .all(parent.id) as { prerequisite_node_id: number }[];
+
+        return result.map(entry => entry.prerequisite_node_id);
+    },
 
     chooseNClasses: (parent: any) =>
       db
