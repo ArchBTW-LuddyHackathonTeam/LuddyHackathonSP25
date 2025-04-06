@@ -55,7 +55,7 @@ router.get("/", (_req, res) => {
             })
         })
         .then(data => res.json(data))
-        .catch(_ => res.status(404).json({ message: "Unknown Class ID" }))
+        .catch(_ => res.status(404).json({ message: "An unknown error occurred" }))
 })
 
 router.get("/id/:id", (req, res) => {
@@ -163,7 +163,7 @@ router.get("/attribute/:attribute", (req, res) => {
             })
         })
         .then(data => res.json(data))
-        .catch(_ => res.status(404).json({ message: "Unknown Class ID" }))
+        .catch(_ => res.status(404).json({ message: "Unknown Attribute" }))
 })
 
 router.get("/department/:abbrev", (req, res) => {
