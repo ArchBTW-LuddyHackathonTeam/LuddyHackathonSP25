@@ -52,7 +52,7 @@ export interface Message {
 const API_BASE_URL = 'http://localhost:3000';
 const NODE_ENDPOINT = `${API_BASE_URL}/nodes`;
 const CLASS_ENDPOINT = `${API_BASE_URL}/classes`;
-const CHAT_ENDPOINT = `${API_BASE_URL}/chat`;
+const SCHED_ENDPOINT = `${API_BASE_URL}/scheduler`;
 
 // Debug logging prefix to make logs easily identifiable
 const LOG_PREFIX = '[DegreeExplorer API]';
@@ -323,58 +323,29 @@ export interface AssistantResponse {
  * @returns Promise resolving to an assistant response message
  */
 export const sendMessageToAssistant = async (messages: Message[]): Promise<AssistantResponse> => {
-  console.log(`${LOG_PREFIX} sendMessageToAssistant: Sending ${messages.length} messages to assistant`);
-  
-  // Log the latest user message for debugging without exposing entire conversation history
-  if (messages.length > 0) {
-    const lastMessage = messages[messages.length - 1];
-    if (lastMessage.role === 'user') {
-      console.log(`${LOG_PREFIX} sendMessageToAssistant: Latest user message: "${lastMessage.content.substring(0, 100)}${lastMessage.content.length > 100 ? '...' : ''}"`);
-    }
-  }
-  
-  try {
-    console.log(`${LOG_PREFIX} sendMessageToAssistant: Sending request to ${CHAT_ENDPOINT}`);
-    const response = await fetch(CHAT_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ messages }),
-    });
-    
-    console.log(`${LOG_PREFIX} sendMessageToAssistant: Received response with status ${response.status}`);
-    
-    if (!response.ok) {
-      console.error(`${LOG_PREFIX} sendMessageToAssistant: HTTP error ${response.status}: ${response.statusText}`);
-      throw new Error(`Error communicating with assistant: ${response.statusText}`);
-    }
-    
-    const data = await response.json();
-    console.log(`${LOG_PREFIX} sendMessageToAssistant: Successfully received assistant response`);
-    
-    const result = {
-      message: {
-        role: 'assistant' as 'assistant',
-        content: data.response || 'I apologize, but I was unable to process your request.'
-      },
-      timestamp: new Date()
-    };
-    
-    // Log a preview of the assistant's response
-    console.log(`${LOG_PREFIX} sendMessageToAssistant: Assistant response: "${result.message.content.substring(0, 100)}${result.message.content.length > 100 ? '...' : ''}"`);
-    
-    return result;
-  } catch (error) {
-    console.error(`${LOG_PREFIX} sendMessageToAssistant: Error sending message to assistant:`, error);
-    
-    // Return a fallback response in case of errors
-    return {
-      message: {
-        role: 'assistant',
-        content: 'I apologize, but I encountered an error while processing your request. Please try again later.'
-      },
-      timestamp: new Date()
-    };
-  }
-};
+    return new Promise((resolve, reject) => {
+
+      fetch(`${SCHED_ENDPOINT}/prompt`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ messages })
+      })
+        .then(res => res.json())
+        .then(data => resolve({
+            message: {
+              role: 'assistant' as 'assistant',
+              content: data.message || 'I apologize, but I was unable to process your request.'
+            },
+            timestamp: new Date()
+          }))
+        .catch(_ => reject({
+            message: {
+              role: 'assistant',
+              content: 'I apologize, but I encountered an error while processing your request. Please try again later.'
+            },
+            timestamp: new Date()
+          }))
+    })
+}
