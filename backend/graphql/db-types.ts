@@ -95,3 +95,16 @@ export interface DepartmentCourses {
 export interface Course {
     id: string
 }
+
+export interface Class {
+    code: string,
+    credits: number,
+    description: string,
+    instructionMode: string,
+    attributes: string[],
+    terms: string[],
+    days?: string,
+    time?: string,
+    instructor: string,
+    instructorAvg: number
+}
