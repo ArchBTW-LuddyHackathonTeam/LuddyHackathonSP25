@@ -47,8 +47,8 @@ router.get("/", (_req, res) => {
                     time: data.sections.length > 0
                         ? data.sections[0].time_of_day
                         : null,
-                    instructor: data.instructor.name,
-                    instructorAvg: data.instructor.reviews.length > 0
+                    instructor: data.instructor ? data.instructor.name : null,
+                    instructorAvg: (data.instructor && data.instructor.reviews.length > 0)
                         ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                         : NaN
                 } as Class
@@ -100,8 +100,8 @@ router.get("/id/:id", (req, res) => {
                 time: data.sections.length > 0
                     ? data.sections[0].time_of_day
                     : null,
-                instructor: data.instructor.name,
-                instructorAvg: data.instructor.reviews.length > 0
+                instructor: data.instructor ? data.instructor.name : null,
+                instructorAvg: (data.instructor && data.instructor.reviews.length > 0)
                     ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                     : NaN
             } as Class
@@ -136,13 +136,11 @@ router.post("/ids", (req, res) => {
                 }
             }`, { ids: req.body.ids })
             .then(data => {
-                console.log(data)
                 if (data && data.courses_ids) return data.courses_ids as any[]
                 else throw new Error()
             })
             .then(data => {
                 return data.map(data => {
-                    console.log(data)
                     return {
                         code: data.course_code,
                         credits: data.credits,
@@ -164,10 +162,7 @@ router.post("/ids", (req, res) => {
                 })
             })
             .then(data => res.json(data))
-            .catch(e => {
-                console.log(e)
-                res.status(404).json({ message: "Invalid form of IDs" })
-            })
+            .catch(_ => res.status(404).json({ message: "Invalid form of IDs" }))
     } else res.status(404).json({ message: "Invalid form of IDs" })
 })
 
@@ -217,10 +212,73 @@ router.get("/attributeID/:attribute", (req, res) => {
                         ? data.sections[0].time_of_day
                         : null,
                     instructor: data.instructor.name,
-                    instructorAvg: data.instructor.reviews.length > 0
+                    instructorAvg: (data.instructor && data.instructor.reviews.length > 0)
                         ? data.instructor.reviews.map((r: any) => r.quality_score).reduce((left: number, right: number) => left + right, 0) / data.instructor.reviews.length
                         : NaN
                 } as Class
+            })
+        })
+        .then(data => res.json(data))
+        .catch(_ => res.status(404).json({ message: "Unknown Attribute" }))
+})
+
+router.get("/attribute/:attribute", (req, res) => {
+    internalRequest(`
+        query Course_attribute($abbrev: String!) {
+            course_attributes_abbrev(abbrev: $abbrev) {
+                courses {
+                    course_code
+                    credits
+                    description
+                    instruction_mode
+                    attributes {
+                        name
+                    }
+                    terms_offered
+                    sections {
+                        days_of_week
+                        time_of_day
+                    }
+                    instructor {
+                        name
+                        reviews {
+                            quality_score
+                        }
+                    }
+                }
+            }
+        }`, { abbrev: req.params.attribute })
+        .then(data => {
+            if (data && data.course_attributes_abbrev) return data.course_attributes_abbrev as any[]
+            else throw new Error()
+        })
+        .then(data => {
+            return data.flatMap(data => {
+                return data.courses.map((data: any) => {
+                    return {
+                        code: data.course_code,
+                        credits: data.credits,
+                        description: data.description ? data.description : null,
+                        instructionMode: data.instruction_mode,
+                        attributes: data.attributes.map((a: any) => a.name),
+                        terms: data.terms_offered,
+                        days: data.sections.length > 0
+                            ? data.sections[0].days_of_week
+                            : null,
+                        time: data.sections.length > 0
+                            ? data.sections[0].time_of_day
+                            : null,
+                        instructor: data.instructor ? data.instructor.name : null,
+                        instructorAvg: data.instructor
+                            ? (data.instructor.reviews.length > 0
+                                ? data.instructor.reviews
+                                    .map((r: any) => r.quality_score)
+                                    .reduce((left: number, right: number) => left + right, 0)
+                                        / data.instructor.reviews.length
+                                : NaN)
+                            : null
+                    } as Class
+                })
             })
         })
         .then(data => res.json(data))
@@ -258,7 +316,6 @@ router.get("/department/:abbrev", (req, res) => {
             else throw new Error()
         })
         .then(data => {
-            console.log(data)
             return data.flatMap(data => {
                 return data.map((data: any) => {
                     return {
