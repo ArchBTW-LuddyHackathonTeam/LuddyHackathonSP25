@@ -104,14 +104,14 @@ export const buildDegreeTree = async (rootId: number): Promise<Node> => {
  * Get classes that have a specific attribute
  * @param attribute - The attribute code (e.g., "AH", "SH")
  * @returns Promise resolving to an array of Class objects with the specified attribute
- * 
- * TODO:
- * - Make a GET request to get classes filtered by the specified attribute
- * - Return them as an array of Class objects
  */
 export const getClassesByAttribute = async (attribute: string): Promise<Class[]> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}/attribute/${attribute}`)
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
 };
 
 /**
@@ -148,12 +148,39 @@ export const searchClasses = async (query: string): Promise<Class[]> => {
  * Get classes for a specific department
  * @param department - Department code (e.g., "CSCI", "MATH")
  * @returns Promise resolving to an array of Class objects from the specified department
- * 
- * TODO:
- * - Make a GET request to fetch classes from the specified department
- * - Return them as an array of Class objects
  */
 export const getClassesByDepartment = async (department: string): Promise<Class[]> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}/department/${department}`)
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
+};
+
+/**
+ * Get a class for a specific id
+ * @param id - An id corresponding to a given course
+ * @returns Promise resolving to a single Class object
+ */
+export const getClass = async (id: string): Promise<Class[]> => {
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}/id/${id}`)
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
+};
+
+/**
+ * Get all classes
+ * @returns Promise resolving to an array of Class objects
+ */
+export const getClasses = async (): Promise<Class[]> => {
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}`)
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
 };
