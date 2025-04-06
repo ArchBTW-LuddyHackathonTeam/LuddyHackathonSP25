@@ -38,7 +38,7 @@ interface Node {
     attributes: string[];
     chooseNClasses: number[];
     course_id?: number;
-    dropdownChildren?: boolean;
+    dropdown_children?: boolean;
     department: { abbreviation?: string };
     prerequisite_ids: number[];
 }
@@ -86,10 +86,10 @@ router.get("/:id", async (req, res) => {
         }
 
         if (
-            temp.dropdownChildren !== null &&
-            temp.dropdownChildren !== undefined
+            temp.dropdown_children !== null &&
+            temp.dropdown_children !== undefined
         ) {
-            response.dropdownChildren = temp.dropdownChildren;
+            response.dropdownChildren = temp.dropdown_children;
         }
 
         if (temp.department && temp.department.abbreviation) {
