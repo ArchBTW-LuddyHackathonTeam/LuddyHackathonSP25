@@ -128,12 +128,12 @@ export interface Course {
 export interface Class {
     code: string,
     credits: number,
-    description: string,
+    description?: string,
     instructionMode: string,
     attributes: string[],
     terms: string[],
     days?: string,
     time?: string,
-    instructor: string,
-    instructorAvg: number
+    instructor?: string,
+    instructorAvg?: number
 }
