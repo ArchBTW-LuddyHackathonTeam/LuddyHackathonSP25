@@ -9,7 +9,7 @@ Traditional university course selectors have long been burdened by unintuitive d
 ### Inspiration and Concept
 After exploring several existing systems, we identified key areas for improvement: usability, streamlined navigation, and personalized recommendations. We observed that many course planners suffer from cluttered interfaces, overly complex navigation, and generic suggestions that do not cater to individual needs. In response, iGPS++ brings together a home-based course selection interface with an intelligent assistant designed to offer tailored academic recommendations.
 
-#### Design Concept
+### Design Concept
 We were inspired by the simplicity found in modern projects and applications. Our design centers on a clean main page featuring a unified dropdown view of courses, requirements, and all other essential elements needed for effective planning. This streamlined interface is enhanced by an AI assistant tab that leverages the personalized data you provide, such as courses taken, academic performance, and individual interests, to generate tailored course recommendations and provide targeted, data-driven advising responses.
 
 ### Development Process, Challenges, and Insights
