@@ -27,7 +27,7 @@ const extractAttributeValue = (attribute) => {
     // Most likely candidates for the actual value
     if (attribute.value !== undefined) return attribute.value;
     if (attribute.code !== undefined) return attribute.code;
-    if (attribute.name !== undefined) return attribute.name;
+    if (attribute.description !== undefined) return attribute.description;
     if (attribute.id !== undefined) return attribute.id;
     if (attribute.key !== undefined) return attribute.key;
     
@@ -559,7 +559,7 @@ const TreeView = ({
                             }}
                           >
                             <div>
-                              <div className="font-medium">{course.code}: {course.name || ''}</div>
+                              <div className="font-medium">{course.code}: {course.description || ''}</div>
                               <div className="text-sm text-gray-600 mt-1 flex items-center flex-wrap gap-2">
                                 <span className="flex items-center">
                                   <Users size={14} className="mr-1" /> {course.instructor}
