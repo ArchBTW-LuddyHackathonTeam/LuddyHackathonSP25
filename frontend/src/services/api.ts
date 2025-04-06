@@ -154,18 +154,15 @@ export const getClassesByAttribute = async (attribute: string): Promise<Class[]>
  * @returns Promise resolving to an array of Class objects matching the course IDs
  */
 export const getClassesByCourseIds = async (courseIds: number[]): Promise<Class[]> => {
-  // Simple dummy implementation
-  return courseIds.map(id => ({
-    id: id.toString(),
-    code: `CSCI-${id}`,
-    credits: 3,
-    description: `Description for course ${id}`,
-    instructionMode: "In Person",
-    attributes: ["A&H"],
-    terms: ["Fall 2024", "Spring 2025"],
-    instructor: "Professor Smith",
-    instructorAvg: 4.2
-  }));
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}/ids`, {
+            method: "POST",
+            body: JSON.stringify({ ids: courseIds })
+        })
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
 };
 
 /**
