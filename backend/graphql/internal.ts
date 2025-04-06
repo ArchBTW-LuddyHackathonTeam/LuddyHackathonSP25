@@ -7,6 +7,10 @@ async function internalRequest(query: string, variables: object = {}) {
         throw Error("GraphQL incremental responses not supported");
     }
 
+    if (response.body.singleResult.errors){
+        throw Error(JSON.stringify(response.body.singleResult.errors));
+    }
+
     return response.body.singleResult.data;
 }
 
