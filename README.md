@@ -22,37 +22,37 @@ The development of iGPS++ began with a brainstorming session to define key funct
         $ cd LuddyHackathonSP25
 
 
-### Install Dependencies and start the servers
+### Install Dependencies and start the service
 
-1. Move into the backend directory
-
-        $ cd /path/to/repo/backend
-
-3. Install node dependencies
-
-        $ npm i
-
-4. Build the server
-
-        $ npm run build
-
-5. Start the server 
-    
-        $ npm run start
-
-6. Move into the frontend directory
+1. Move into the frontend directory
 
         $ cd /path/to/repo/frontend
 
-7. Install node dependencies
+2. Install node dependencies
 
         $ npm i
 
-8. Build the server
+3. Build the frontend
 
         $ npm run build
 
-9. Start the server
+4. Move into the backend directory
 
-        $ npm run dev
+        $ cd /path/to/repo/backend
+
+5. Install node dependencies
+
+        $ npm i
+
+5. Link the frontend with the server
+
+        $ npm run setup
+
+6. Build the server
+
+        $ npm run build
+
+7. Start the server
+
+        $ npm run start
 
