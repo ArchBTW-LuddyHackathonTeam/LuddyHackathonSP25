@@ -80,8 +80,8 @@ type Node {
   department: Department,
   prerequisites: [Node],
   prerequisite_ids: [ID!]
-  attributes: [CourseAttribute],
-  chooseNClasses: [Course]
+  attributes: [CourseAttribute!],
+  chooseNClasses: [Course!]
 }
 
 # Users
