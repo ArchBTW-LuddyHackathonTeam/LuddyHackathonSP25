@@ -121,6 +121,20 @@ export const buildDegreeTree = async (rootId: number): Promise<Node> => {
 };
 
 /**
+ * Get classes that have a specific attribute id
+ * @param attribute - The attribute id
+ * @returns Promise resolving to an array of Class objects with the specified attribute id
+ */
+export const getClassesByAttributeID = async (attributeID: string): Promise<Class[]> => {
+    return new Promise((resolve, reject) => {
+        fetch(`${CLASS_ENDPOINT}/attributeID/${attributeID}`)
+            .then(res => res.json())
+            .then(res => resolve(res))
+            .catch(e => reject(e))
+    })
+};
+
+/**
  * Get classes that have a specific attribute
  * @param attribute - The attribute code (e.g., "AH", "SH")
  * @returns Promise resolving to an array of Class objects with the specified attribute

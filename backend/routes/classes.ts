@@ -110,7 +110,7 @@ router.get("/id/:id", (req, res) => {
         .catch(_ => res.status(404).json({ message: "Unknown Class ID" }))
 })
 
-router.get("/attribute/:attribute", (req, res) => {
+router.get("/attributeID/:attribute", (req, res) => {
     internalRequest(`
         query Courses($courseAttributeId: ID!) {
             course_attribute(id: $courseAttributeId) {
