@@ -155,8 +155,50 @@ const CourseTree = () => {
         // Wait for all data to load
         await Promise.all([...attributePromises, ...courseSelectionPromises]);
         
+        // Generate unique IDs for each course if they don't have one
+        Object.entries(newClassData).forEach(([key, courses]) => {
+          if (!courses) {
+            console.log(`No courses found for key: ${key}`);
+            return;
+          }
+          
+          courses.forEach((course, index) => {
+            if (!course.id) {
+              // Create a unique ID using the category, course code, and index
+              course.id = `${key}_${course.code}_${index}`;
+              console.log(`Generated ID for ${key}: ${course.code} -> ${course.id}`);
+            }
+          });
+        });
+        
+        // Debug logging
+        console.log(`=== LOADED CLASS DATA ===`);
+        
+        const allCourseIds = [];
+        const coursesWithoutIds = [];
+        const duplicateIds = new Set();
+        
+        Object.entries(newClassData).forEach(([key, courses]) => {
+          if (!courses) return;
+          
+          courses.forEach(course => {
+            if (!course.id) {
+              coursesWithoutIds.push(`${key}: ${course.code}`);
+            } else {
+              if (allCourseIds.includes(course.id)) {
+                duplicateIds.add(course.id);
+              }
+              allCourseIds.push(course.id);
+            }
+          });
+        });
+        
+        console.log(`Total courses loaded: ${allCourseIds.length}`);
+        console.log(`Courses without IDs: ${coursesWithoutIds.length}`, coursesWithoutIds);
+        console.log(`Duplicate IDs found: ${duplicateIds.size}`, [...duplicateIds]);
+        
         setClassData(newClassData);
-        setFilteredCourseData(newClassData); // Initialize filtered data with full data
+        setFilteredCourseData(newClassData);
         
       } catch (error) {
         console.error("Error loading class data:", error);
@@ -257,26 +299,45 @@ const CourseTree = () => {
 
   // Handle class selection for "choose N" nodes
   const toggleClassSelection = (nodeId, classId, attribute = null) => {
+    console.log(`=== TOGGLE CLASS SELECTION ===`);
+    console.log(`Parameters: nodeId=${nodeId}, classId=${classId}, attribute=${attribute}`);
+    console.log(`Type of classId: ${typeof classId}`);
+    
+    // Ensure consistent type (convert to string)
+    const stringNodeId = String(nodeId);
+    const stringClassId = String(classId);
+    
+    console.log(`Converted: nodeId=${stringNodeId}, classId=${stringClassId}`);
+    
     setSelectedClasses(prev => {
-      const currentSelected = prev[nodeId] || [];
-      if (currentSelected.includes(classId)) {
+      const currentSelected = prev[stringNodeId] || [];
+      console.log(`Current selected for node ${stringNodeId}:`, currentSelected);
+      console.log(`Types of current selections:`, currentSelected.map(id => typeof id));
+      
+      // Convert all current selections to strings for consistent comparison
+      const currentSelectedStrings = currentSelected.map(id => String(id));
+      
+      if (currentSelectedStrings.includes(stringClassId)) {
+        console.log(`REMOVING: Class ${stringClassId} is already selected, removing it`);
         return {
           ...prev,
-          [nodeId]: currentSelected.filter(id => id !== classId)
+          [stringNodeId]: currentSelected.filter(id => String(id) !== stringClassId)
         };
       } else {
         // Check if we've already selected the max number
         const node = nodeMap[nodeId];
         if (node && node.numberValue && currentSelected.length >= node.numberValue) {
+          console.log(`REPLACING: Max selection reached, replacing oldest with ${stringClassId}`);
           // Replace the oldest selection
           return {
             ...prev,
-            [nodeId]: [...currentSelected.slice(1), classId]
+            [stringNodeId]: [...currentSelected.slice(1), stringClassId]
           };
         } else {
+          console.log(`ADDING: Adding class ${stringClassId} to selections`);
           return {
             ...prev,
-            [nodeId]: [...currentSelected, classId]
+            [stringNodeId]: [...currentSelected, stringClassId]
           };
         }
       }

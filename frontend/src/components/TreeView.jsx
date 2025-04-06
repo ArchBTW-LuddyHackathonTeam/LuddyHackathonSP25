@@ -45,10 +45,16 @@ const TreeView = ({
 }) => {
   // Render attribute-based course browser
   const renderAttributeCourseBrowser = (node, attribute) => {
-    const courseKey = `attr_${node.id}`;
+    const courseKey = `attr_${node.id}_${attribute}`;
     const isExpanded = expandedCourses[courseKey];
     const searchTerm = courseSearchTerms[attribute] || "";
     const courses = filteredCourseData[attribute] || [];
+
+    console.log(`=== ATTRIBUTE COURSE RENDER ===`);
+    console.log(`Node ID: ${node.id}, Course ID: ${course.id}, Course: ${course.code}`);
+    console.log(`Course ID type: ${typeof course.id}`);
+    console.log(`isSelected: ${isSelected}, isCompleted: ${isCompleted}`);
+    console.log(`Selected classes for this node:`, selectedClasses[node.id]);
     
     return (
       <div className="mt-3">
@@ -82,7 +88,8 @@ const TreeView = ({
               <div className="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto">
                 {courses.map(course => {
                   // Check if this course is selected for this node
-                  const isSelected = selectedClasses[node.id]?.includes(course.id);
+                  const isSelected = course.id && selectedClasses[node.id]?.includes(course.id);
+
                   // Check if course is completed
                   const isCompleted = completedClasses[attribute]?.includes(course.id);
                   
@@ -131,7 +138,12 @@ const TreeView = ({
                               }`}
                               onClick={(e) => { 
                                 e.stopPropagation(); 
-                                toggleClassSelection(node.id, course.id, attribute);
+                                if (course.id) {
+                                  console.log(`Clicking attribute course: ${course.code}, ID: ${course.id}`);
+                                  toggleClassSelection(node.id, course.id, attribute);
+                                } else {
+                                  console.error(`Cannot select course - no ID available: ${course.code}`);
+                                }
                               }}
                               title="Select for degree plan"
                             >
@@ -481,7 +493,15 @@ const TreeView = ({
                             className={`p-3 hover:bg-gray-50 flex justify-between items-center cursor-pointer transition-colors ${
                               selectedClasses[node.id]?.includes(course.id) ? 'bg-blue-50' : ''
                             }`}
-                            onClick={(e) => { e.stopPropagation(); toggleClassSelection(node.id, course.id); }}
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              if (course.id) {
+                                console.log(`Clicking choose course: ${course.code}, ID: ${course.id}`);
+                                toggleClassSelection(node.id, course.id);
+                              } else {
+                                console.error(`Cannot select course - no ID available: ${course.code}`);
+                              }
+                            }}
                           >
                             <div>
                               <div className="font-medium">{course.code}: {course.name || ''}</div>

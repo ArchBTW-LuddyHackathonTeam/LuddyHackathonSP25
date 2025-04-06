@@ -28,7 +28,7 @@ export enum Attribute {
 }
 
 export interface Class {
-  id?: string;
+  id: string;
   code: string;
   credits: number;
   description: string;
