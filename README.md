@@ -15,6 +15,24 @@ We were inspired by the simplicity found in modern projects and applications. Ou
 ### Development Process, Challenges, and Insights
 The development of iGPS++ began with a brainstorming session aimed at defining our core functional and aesthetic requirements. We then divided responsibilities among front-end development, database management, and AI integration. While this initial division of labor presented challenges in synchronizing independently developed modules, these issues were resolved through a few hours of integration and continuous communication. This iterative process not only enhanced the system's reliability and maintainability but also helped us appreciate the value of collaborative problem solving.
 
+### Features
+
+- Fully-featured graphql database
+
+    - GraphQL provides an easy-to-understand interface to the database, enabling user programs to avoid overfetching and naturally handle nested or recursive data structures.
+
+- REST API Endpoints
+
+    - REST API endpoints were used to simplify straightforward queries, such as retrieving course lists, while leveraging GraphQL for more complex and nested data interactions.
+
+- Fully-featured front-end build with React
+
+    - An intuitive front-end interface sets iGPS++ apart by clearly communicating degree requirements and offering seamless interaction with the AI assistant.
+
+- A personalized AI assistant for all scheduling needs
+
+    - A powerful AI chatbot is integrated into the entire scheduling process with access to your requirements and what you have already fulfilled
+
 ## 📝 Getting Started
 
 ### Clone the Repository
