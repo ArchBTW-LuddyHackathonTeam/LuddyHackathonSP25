@@ -75,6 +75,35 @@ export interface AddCourseTermOfferedInput extends AddInput {
     term_offered: string;
 }
 
+export interface AddInstructorOfficeHoursInput extends AddInput {
+    instructor_id: number;
+    days_of_week: string;
+    time_of_day: string;
+    type: string;
+}
+
+export interface EditInstructorOfficeHoursInput extends EditInput {
+    instructor_id ?: number;
+    days_of_week ?: string;
+    time_of_day ?: string;
+    type ?: string;
+}
+
+export interface AddCourseSectionInput extends AddInput {
+    course_id: number;
+    section_id: number;
+}
+
+export interface AddCoursePrerequisiteInput extends AddInput {
+    course_id: number;
+    prerequisite_course_id: number;
+}
+
+export interface AddCourseAttributeRelationInput extends AddInput {
+    course_id: number;
+    attribute_id: number;
+}
+
 export interface AddUserInput extends AddInput {
     salt: string;
     username: string;

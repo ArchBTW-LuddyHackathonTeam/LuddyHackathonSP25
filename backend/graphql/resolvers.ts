@@ -1,7 +1,9 @@
 import db from "./db";
 import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput,
     EditInstructorInput, AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput, AddCourseAttributeInput,
-    EditCourseAttributeInput, AddCourseTermOfferedInput } from "./db-types";
+            EditCourseAttributeInput, AddCourseTermOfferedInput, AddInstructorOfficeHoursInput,
+            EditInstructorOfficeHoursInput, AddCourseSectionInput, AddCoursePrerequisiteInput,
+            AddCourseAttributeRelationInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
@@ -256,6 +258,27 @@ export const resolvers = {
 
     addCourseTermOffered: (_parent: any, { courseTermOffered }: { courseTermOffered: AddCourseTermOfferedInput}) => 
         addEntry("courses_terms_offered", courseTermOffered),
+
+    addInstructorOfficeHours: (_parent: any, { officeHour }: { officeHour: AddInstructorOfficeHoursInput}) => 
+        addEntry("office_hours", officeHour),
+
+    updateInstructorOfficeHours: (_parent: any, { officeHour }: { officeHour: EditInstructorOfficeHoursInput}) => 
+        editEntry("office_hours", officeHour),
+
+    addCourseSection: (_parent: any, { relation }: { relation: AddCourseSectionInput}) => {
+        addEntry("course_sections", relation);
+        return db.prepare("SELECT * FROM courses WHERE id = ?").get(relation.course_id);
+    },
+
+    addCoursePrerequisite: (_parent: any, { relation }: {relation: AddCoursePrerequisiteInput}) => {
+        addEntry("course_prerequisites", relation);
+        return db.prepare("SELECT * FROM courses WHERE id = ?").get(relation.course_id);
+    },
+
+    addCourseAttributeRelation: (_parent: any, { relation }: { relation: AddCourseAttributeRelationInput }) => {
+        addEntry("course_attribute_mapping", relation);
+        return db.prepare("SELECT * FROM courses WHERE id = ?").get(relation.course_id);
+    },
 
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 

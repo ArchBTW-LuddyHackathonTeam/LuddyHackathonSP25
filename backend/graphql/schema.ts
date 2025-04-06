@@ -129,7 +129,6 @@ type Mutation {
   updateInstructor(instructor: EditInstructorUpdate!): Instructor
 
   addCourse(course: AddCourseInput!): Course
-  courses_ids(ids: [ID!]): [Course!]
   updateCourse(course: EditCourseInput!): Course
 
   addSection(section: AddSectionInput!): Section
@@ -139,6 +138,15 @@ type Mutation {
   updateCourseAttribute(courseAttribute: EditCourseAttributeInput!): CourseAttribute
 
   addCourseTermOffered(courseTermOffered: AddcourseTermOfferedInput!): Course
+
+  addInstructorOfficeHours(officeHour: AddInstructorOfficeHourInput!): OfficeHour
+  updateInstructorOfficeHours(officeHour: EditInstructorOfficeHourInput!): OfficeHour
+
+  addCourseSection(relation: AddCourseSectionInput!): Course
+
+  addCoursePrerequisite(relation: AddCoursePrerequisiteInput!): Course
+
+  addCourseAttributeRelation(relation: AddCoursePrerequisiteRelationInput!): Course
 
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
@@ -220,6 +228,40 @@ input EditCourseAttributeInput {
 input AddcourseTermOfferedInput {
   course_id: ID!
   term_offered: String!
+}
+
+# Instructor Office Hour Mutation Inputs
+input AddInstructorOfficeHourInput {
+  instructor_id: ID!
+  days_of_week: String!
+  time_of_day: String!
+  type: String!
+}
+
+input EditInstructorOfficeHourInput {
+  id: ID!
+  instructor_id: ID
+  days_of_week: String
+  time_of_day: String
+  type: String
+}
+
+# Course Section Mutation Inputs
+input AddCourseSectionInput {
+  course_id: ID!
+  section_id: ID!
+}
+
+# Course Prerequisite Mutation Inputs
+input AddCoursePrerequisiteInput {
+  course_id: ID!
+  prerequisite_course_id: ID!
+}
+
+# Course Attribute Relation Mutation Inputs
+input AddCoursePrerequisiteRelationInput {
+  course_id: ID!
+  attribute_id: ID!
 }
 
 # User Mutation Inputs
