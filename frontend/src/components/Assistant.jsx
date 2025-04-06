@@ -6,8 +6,7 @@ const Assistant = ({
   assistantMessages,
   isAssistantTyping,
   userMessage,
-  setUserMessage,
-  sendAssistantMessage
+  setUserMessage
 }) => {
   const messagesEndRef = useRef(null);
   // Get the sendMessageWithUserData function from context
@@ -20,15 +19,16 @@ const Assistant = ({
     }
   }, [assistantMessages]);
 
-  // Handle sending message - using both your original function and our context function
+  // Handle sending message - now only using the context function
   const handleSendMessage = () => {
     if (!userMessage.trim() || isAssistantTyping) return;
     
     // Call the context function to store the message history with user data
+    // and handle the UI updates
     sendMessageWithUserData(userMessage);
     
-    // Also call your original function to handle the UI and generate a response
-    sendAssistantMessage();
+    // Clear the input after sending
+    setUserMessage('');
   };
 
   return (

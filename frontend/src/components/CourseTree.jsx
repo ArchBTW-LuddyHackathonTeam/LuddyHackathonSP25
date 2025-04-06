@@ -357,56 +357,6 @@ const CourseTree = () => {
     setSelectedNode(nodeId);
   };
 
-  // Send assistant message
-  const sendAssistantMessage = () => {
-    if (!userMessage.trim()) return;
-    
-    // Add user message
-    setAssistantMessages(prev => [
-      ...prev, 
-      {
-        sender: 'user',
-        content: userMessage,
-        timestamp: new Date()
-      }
-    ]);
-    
-    setUserMessage('');
-    setIsAssistantTyping(true);
-    
-    // Simulate assistant typing
-    setTimeout(() => {
-      setAssistantMessages(prev => [
-        ...prev,
-        {
-          sender: 'assistant',
-          content: getAssistantResponse(userMessage),
-          timestamp: new Date()
-        }
-      ]);
-      setIsAssistantTyping(false);
-    }, 1500);
-  };
-
-  // Get sample assistant responses
-  const getAssistantResponse = (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-      return "Based on your progress, I'd recommend focusing on completing your General Education Requirements first, particularly the Arts and Humanities courses. HIST 101 (Introduction to History) has great reviews and fulfills the A&H requirement.";
-    } else if (lowerMessage.includes('specialization') || lowerMessage.includes('focus')) {
-      return "For Computer Science, you have two specialization options: Software Engineering and Systems. Software Engineering focuses more on development methodology and large-scale applications, while Systems delves deeper into hardware interactions and optimization. Based on your current courses, Software Engineering might align better with your interests.";
-    } else if (lowerMessage.includes('progress') || lowerMessage.includes('how am i doing')) {
-      return "You're making good progress! You've completed about 42% of your degree requirements. To stay on track for graduation in 4 years, try to complete at least 30 credits per academic year.";
-    } else if (lowerMessage.includes('difficult') || lowerMessage.includes('hard') || lowerMessage.includes('challenging')) {
-      return "Some of the more challenging courses in your upcoming requirements might be CSCI 403 (Advanced Algorithms) and MATH 375 (Linear Algebra). I'd recommend balancing your schedule by not taking both in the same semester.";
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      return "Hello! How can I assist with your degree planning today? I can help with course recommendations, requirement explanations, or scheduling advice.";
-    } else {
-      return "I understand you're asking about your degree plan. To give you more specific guidance, could you tell me what aspect you're interested in? For example, I can help with course recommendations, scheduling, or explaining specific requirements.";
-    }
-  };
-
   // Get progress percentage
   const getProgressPercentage = () => {
     if (totalCredits === 0) return 0;
@@ -641,7 +591,6 @@ const CourseTree = () => {
                 isAssistantTyping={isAssistantTyping}
                 userMessage={userMessage}
                 setUserMessage={setUserMessage}
-                sendAssistantMessage={sendAssistantMessage}
               />
             </div>
           </main>
