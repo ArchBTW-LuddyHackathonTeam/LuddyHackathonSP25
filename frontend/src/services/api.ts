@@ -49,7 +49,7 @@ export interface Message {
 }
 
 // API Endpoints - TODO: Replace with actual endpoints
-const API_BASE_URL = 'https://your-api-base-url.com/api';
+const API_BASE_URL = 'http://localhost:3000';
 const NODE_ENDPOINT = `${API_BASE_URL}/nodes`;
 const CLASS_ENDPOINT = `${API_BASE_URL}/classes`;
 const CHAT_ENDPOINT = `${API_BASE_URL}/chat`;
