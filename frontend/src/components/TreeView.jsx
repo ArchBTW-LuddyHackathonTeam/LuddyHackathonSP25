@@ -355,21 +355,72 @@ const TreeView = ({
             {/* Dropdown for specialization selection */}
             {nodeType === "dropdown" && (
               <div className="mt-3">
+                {/* Debug logging */}
+                {console.log("=== DROPDOWN DEBUG ===", {
+                  nodeId: node.id,
+                  preRecs: node.preRecs,
+                  dropdownChildren: node.dropdownChildren,
+                  hasPreRecs: !!node.preRecs,
+                  hasDropdownChildren: !!node.dropdownChildren
+                })}
+                
                 <select
                   className="block w-full border border-gray-300 rounded-md shadow-sm p-2.5 focus:ring-blue-500 focus:border-blue-500"
                   value={selectedSpecialization[node.id] || ''}
-                  onChange={(e) => handleSpecializationChange(node.id, parseInt(e.target.value))}
+                  onChange={(e) => {
+                    console.log("Dropdown selection changed:", {
+                      value: e.target.value,
+                      type: typeof e.target.value
+                    });
+                    // Keep as string for consistency
+                    handleSpecializationChange(node.id, e.target.value);
+                    // Auto-expand the node when an option is selected
+                    if (e.target.value && !expandedNodes[node.id]) {
+                      toggleExpand(node.id);
+                    }
+                  }}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <option value="">Select an option</option>
-                  {node.preRecs && node.preRecs.map(childId => {
-                    const childNode = nodeMap[childId];
-                    return childNode ? (
-                      <option key={childId} value={childId}>
-                        {childNode.titleValue}
-                      </option>
-                    ) : null;
-                  })}
+                  
+                  {/* First try to use dropdownChildren if available */}
+                  {node.dropdownChildren && node.dropdownChildren.length > 0 ? (
+                    // Map through the dropdown children objects
+                    node.dropdownChildren.map(childNode => {
+                      console.log("Dropdown option from dropdownChildren:", { 
+                        childNode,
+                        id: childNode.id,
+                        titleValue: childNode.titleValue 
+                      });
+                      
+                      return (
+                        <option key={childNode.id} value={childNode.id.toString()}>
+                          {childNode.titleValue}
+                        </option>
+                      );
+                    })
+                  ) : (
+                    // Fallback to preRecs if no dropdownChildren
+                    node.preRecs && node.preRecs.map(childIdOrNode => {
+                      // Handle both ID strings and node objects in preRecs array
+                      const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                      const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+                      
+                      console.log("Dropdown option from preRecs:", { 
+                        original: childIdOrNode,
+                        type: typeof childIdOrNode,
+                        childId, 
+                        exists: !!childNode, 
+                        childNodeTitle: childNode ? childNode.titleValue : 'N/A' 
+                      });
+                      
+                      return childNode ? (
+                        <option key={childId} value={childId.toString()}>
+                          {childNode.titleValue}
+                        </option>
+                      ) : null;
+                    })
+                  )}
                 </select>
               </div>
             )}
@@ -491,22 +542,82 @@ const TreeView = ({
           </div>
         </div>
         
-        {/* Children nodes */}
+        {/* Children nodes - Modified to handle dropdown nodes specially */}
         {isExpanded && hasChildren && (
           <div className="pl-10 mt-2 space-y-2">
-            {node.preRecs.map((childIdOrNode, index) => {
-              const childId =
-                typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
-              const childNode =
-                typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
-              if (!childNode) return null;
-              
-              return (
-                <React.Fragment key={`${childId}-${index}`}>
-                  {renderModernNode(childNode, level + 1)}
-                </React.Fragment>
-              );
+            {/* Debug for children rendering */}
+            {nodeType === "dropdown" && console.log("Rendering dropdown children", {
+              nodeId: node.id,
+              selectedSpec: selectedSpecialization[node.id],
+              hasSelection: !!selectedSpecialization[node.id],
+              children: node.preRecs
             })}
+            
+            {nodeType === "dropdown" ? (
+              // For dropdown nodes, only render the selected child
+              // First check if we should use dropdownChildren or preRecs
+              node.dropdownChildren && node.dropdownChildren.length > 0 ? (
+                // Use dropdownChildren
+                node.dropdownChildren.map((childNode, index) => {
+                  console.log("Checking dropdown child from dropdownChildren:", {
+                    childId: childNode.id,
+                    childIdType: typeof childNode.id,
+                    selectedId: selectedSpecialization[node.id],
+                    selectedIdType: typeof selectedSpecialization[node.id],
+                    isSelected: childNode.id.toString() === selectedSpecialization[node.id]?.toString(),
+                    hasNode: !!childNode
+                  });
+                  
+                  // Only render the child if it's the selected specialization - compare as strings
+                  if (!childNode || childNode.id.toString() !== selectedSpecialization[node.id]?.toString()) return null;
+                  
+                  return (
+                    <React.Fragment key={`${childNode.id}-${index}`}>
+                      {renderModernNode(childNode, level + 1)}
+                    </React.Fragment>
+                  );
+                })
+              ) : (
+                // Fallback to preRecs
+                node.preRecs.map((childIdOrNode, index) => {
+                  const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                  const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+                  
+                  console.log("Checking dropdown child from preRecs:", {
+                    childId,
+                    childIdType: typeof childId,
+                    selectedId: selectedSpecialization[node.id],
+                    selectedIdType: typeof selectedSpecialization[node.id],
+                    isSelected: childId.toString() === selectedSpecialization[node.id]?.toString(),
+                    hasNode: !!childNode
+                  });
+                  
+                  // Only render the child if it's the selected specialization - compare as strings
+                  if (!childNode || childId.toString() !== selectedSpecialization[node.id]?.toString()) return null;
+                  
+                  return (
+                    <React.Fragment key={`${childId}-${index}`}>
+                      {renderModernNode(childNode, level + 1)}
+                    </React.Fragment>
+                  );
+                })
+              )
+            ) : (
+              // For other node types, render all children
+              node.preRecs.map((childIdOrNode, index) => {
+                const childId =
+                  typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                const childNode =
+                  typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+                if (!childNode) return null;
+                
+                return (
+                  <React.Fragment key={`${childId}-${index}`}>
+                    {renderModernNode(childNode, level + 1)}
+                  </React.Fragment>
+                );
+              })
+            )}
           </div>
         )}
       </div>
