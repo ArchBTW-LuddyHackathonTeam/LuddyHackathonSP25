@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  ZoomIn, ZoomOut, Home, CheckCircle, Circle, ChevronDown, ChevronRight, 
-  BookOpen, Calendar, Award, Users, AlertCircle, BarChart, Clock, Search,
-  MessageSquare, Send, Bot, Layers, User, FileText, PenTool, Info, Filter
+  ZoomIn, ZoomOut, Home, CheckCircle, Circle, 
+  BarChart, Clock, Bot, Layers
 } from 'lucide-react';
-import _ from 'lodash';
 
 // Import refactored components
 import TreeView from './TreeView';
@@ -14,23 +12,15 @@ import Assistant from './Assistant';
 // Import utilities
 import { 
   initialAssistantMessages,
-  AttributeColors, 
-  getNodeType, 
-  getNodeCompletion, 
-  getNodeStatusIcon 
+  AttributeColors
 } from './utils';
 
 // Import API services
 import {
   getRootNodes,
   buildDegreeTree,
-  getNodeById,
   getClassesByAttribute,
   getClassesByCourseIds,
-  searchClasses,
-  getClassesByDepartment,
-  getClass,
-  getClasses,
   Attribute
 } from '../services/api';
 
@@ -49,10 +39,7 @@ const CourseTree = () => {
   const [classData, setClassData] = useState({});
   const [selectedSpecialization, setSelectedSpecialization] = useState({});
   const [zoom, setZoom] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState("tree"); // "tree", "progress", "assistant"
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
   const [selectedNode, setSelectedNode] = useState(null);
   const [viewMode, setViewMode] = useState("modern"); // "modern", "compact", "detailed"
   const [hoveredNode, setHoveredNode] = useState(null);
@@ -64,7 +51,6 @@ const CourseTree = () => {
   const [isAssistantTyping, setIsAssistantTyping] = useState(false);
   const [courseSearchTerms, setCourseSearchTerms] = useState({});
   const [filteredCourseData, setFilteredCourseData] = useState({});
-  // State for completed classes
   const [completedClasses, setCompletedClasses] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   
@@ -245,28 +231,6 @@ const CourseTree = () => {
     setFilteredCourseData(newFilteredData);
   }, [courseSearchTerms, classData]);
 
-  // Handle global search
-  useEffect(() => {
-    const handleSearch = async () => {
-      if (!searchTerm.trim()) {
-        setSearchResults([]);
-        return;
-      }
-      
-      try {
-        const results = await searchClasses(searchTerm);
-        setSearchResults(results);
-      } catch (error) {
-        console.error("Error searching classes:", error);
-        setSearchResults([]);
-      }
-    };
-    
-    // Debounce search to avoid too many API calls
-    const debounceTimeout = setTimeout(handleSearch, 300);
-    return () => clearTimeout(debounceTimeout);
-  }, [searchTerm]);
-
   // Handle node expansion toggle
   const toggleExpand = (nodeId) => {
     setExpandedNodes(prev => ({
@@ -380,7 +344,6 @@ const CourseTree = () => {
 
   // Reset view
   const resetView = () => {
-    setPosition({ x: 0, y: 0 });
     setZoom(1);
   };
 

@@ -165,46 +165,6 @@ export const getClassesByCourseIds = async (courseIds: number[]): Promise<Class[
     })
 };
 
-/**
- * Search for classes across all attributes and departments
- * @param query - Search term
- * @returns Promise resolving to an array of Class objects matching the search term
- */
-export const searchClasses = async (query: string): Promise<Class[]> => {
-  // Simple dummy implementation
-  return [
-    {
-      id: "101",
-      code: `CSCI-101`,
-      name: `Intro to ${query}`,
-      credits: 3,
-      description: `Introduction to ${query}`,
-      instructionMode: "In Person",
-      attributes: ["A&H"],
-      terms: ["Fall 2024"],
-      days: "MWF",
-      time: "10:00 AM - 11:15 AM",
-      location: "Luddy Hall 1001",
-      instructor: "Professor Johnson",
-      instructorAvg: 4.5
-    },
-    {
-      id: "201",
-      code: `MATH-201`,
-      name: `Advanced ${query}`,
-      credits: 4,
-      description: `Advanced topics in ${query}`,
-      instructionMode: "Hybrid",
-      attributes: ["N&M"],
-      terms: ["Spring 2025"],
-      days: "TR",
-      time: "1:00 PM - 2:15 PM",
-      location: "Swain Hall 119",
-      instructor: "Professor Davis",
-      instructorAvg: 3.8
-    }
-  ];
-};
 
 /**
  * Get classes for a specific department
