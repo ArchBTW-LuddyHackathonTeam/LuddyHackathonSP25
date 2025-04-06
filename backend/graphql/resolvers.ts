@@ -48,6 +48,23 @@ const editEntry = (table: string, entry: EditInput) => {
     return statement.get(...values, id);
 };
 
+const deleteById = (table: string, id: number): boolean => {
+    return deleteByKey(table, "id", id);
+}
+
+const deleteByKey = (table: string, key: string, value: any): boolean => {
+    console.log(table, key, value);
+    const exists = db.prepare(`SELECT * from ${table} WHERE ${key} = ?`).get(value);
+    console.log(exists);
+    if (exists === undefined) {
+        return false;
+    }
+
+    db.prepare(`DELETE FROM ${table} WHERE ${key} = ?`).run(value);
+
+    return true;
+}
+
 export const resolvers = {
   Query: {
     departments: () => db.prepare('SELECT * FROM departments').all(),
@@ -304,7 +321,7 @@ export const resolvers = {
     
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
-    deleteUser: (_parent: any, { id }: { id: number }) => // TODO: Add false return if user was not in database
-        !!db.prepare(`DELETE FROM users WHERE id = ?`).run(id),
+    deleteUser: (_parent: any, { id }: { id: number }) => 
+        deleteById("users", id),
   },
 }
