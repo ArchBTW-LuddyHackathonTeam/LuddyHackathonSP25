@@ -58,46 +58,66 @@ const CHAT_ENDPOINT = `${API_BASE_URL}/chat`;
  * Get a single node by ID
  * @param id - The node ID
  * @returns Promise resolving to a Node object with preReqs as IDs
- * 
- * TODO: 
- * - Make a GET request to `${NODE_ENDPOINT}/${id}`
- * - Handle error cases (404, etc.)
- * - Return the node data with preRecs as an array of IDs
  */
 export const getNodeById = async (id: number): Promise<Node> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+  // Simple dummy implementation
+  return {
+    id: id,
+    titleValue: `Node ${id}`,
+    preRecs: [id - 1, id - 2].filter(n => n > 0)
+  };
 };
 
 /**
  * Get root nodes (entry points for degree plans)
  * @returns Promise resolving to an array of root Node objects
- * 
- * TODO:
- * - Make a GET request to fetch root nodes (nodes that aren't prerequisites for any other node)
- * - Return them as an array of Node objects
  */
 export const getRootNodes = async (): Promise<Node[]> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+  // Simple dummy implementation
+  return [
+    {
+      id: 1,
+      titleValue: "Computer Science BS",
+      preRecs: []
+    },
+    {
+      id: 2,
+      titleValue: "Mathematics BS",
+      preRecs: []
+    }
+  ];
 };
 
 /**
  * Build the full degree tree starting from a root node ID
  * @param rootId - The ID of the root node
  * @returns Promise resolving to a fully populated Node tree
- * 
- * TODO:
- * - Create a recursive function that:
- *   1. Gets a node by ID
- *   2. For each prerequisite ID, recursively fetches that node
- *   3. Replaces the preRecs array of IDs with the fetched Node objects
- * - Handle circular references if they exist
- * - Make sure to handle errors gracefully
  */
 export const buildDegreeTree = async (rootId: number): Promise<Node> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+  // Simple dummy implementation
+  const rootNode: Node = {
+    id: rootId,
+    titleValue: `Degree Plan ${rootId}`,
+    preRecs: []
+  };
+  
+  // Add some child nodes
+  const childNode1: Node = {
+    id: rootId * 10 + 1,
+    titleValue: "Core Requirements",
+    preRecs: []
+  };
+  
+  const childNode2: Node = {
+    id: rootId * 10 + 2,
+    titleValue: "Electives",
+    preRecs: []
+  };
+  
+  // Set the root node's preRecs to be the populated Node objects
+  rootNode.preRecs = [childNode1, childNode2];
+  
+  return rootNode;
 };
 
 /**
@@ -118,30 +138,61 @@ export const getClassesByAttribute = async (attribute: string): Promise<Class[]>
  * Get classes by their course IDs
  * @param courseIds - Array of course IDs
  * @returns Promise resolving to an array of Class objects matching the course IDs
- * 
- * TODO:
- * - Make a GET request with the course IDs as query parameters
- * - Format the request appropriately (e.g., ?ids=123&ids=456&ids=789)
- * - Return them as an array of Class objects
  */
 export const getClassesByCourseIds = async (courseIds: number[]): Promise<Class[]> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+  // Simple dummy implementation
+  return courseIds.map(id => ({
+    id: id.toString(),
+    code: `CSCI-${id}`,
+    credits: 3,
+    description: `Description for course ${id}`,
+    instructionMode: "In Person",
+    attributes: ["A&H"],
+    terms: ["Fall 2024", "Spring 2025"],
+    instructor: "Professor Smith",
+    instructorAvg: 4.2
+  }));
 };
 
 /**
  * Search for classes across all attributes and departments
  * @param query - Search term
  * @returns Promise resolving to an array of Class objects matching the search term
- * 
- * TODO:
- * - Make a GET request to search for classes containing the query in their name, code, instructor, etc.
- * - URL encode the query parameter
- * - Return them as an array of Class objects
  */
 export const searchClasses = async (query: string): Promise<Class[]> => {
-  // TODO: Implement this function
-  throw new Error("Not implemented");
+  // Simple dummy implementation
+  return [
+    {
+      id: "101",
+      code: `CSCI-101`,
+      name: `Intro to ${query}`,
+      credits: 3,
+      description: `Introduction to ${query}`,
+      instructionMode: "In Person",
+      attributes: ["A&H"],
+      terms: ["Fall 2024"],
+      days: "MWF",
+      time: "10:00 AM - 11:15 AM",
+      location: "Luddy Hall 1001",
+      instructor: "Professor Johnson",
+      instructorAvg: 4.5
+    },
+    {
+      id: "201",
+      code: `MATH-201`,
+      name: `Advanced ${query}`,
+      credits: 4,
+      description: `Advanced topics in ${query}`,
+      instructionMode: "Hybrid",
+      attributes: ["N&M"],
+      terms: ["Spring 2025"],
+      days: "TR",
+      time: "1:00 PM - 2:15 PM",
+      location: "Swain Hall 119",
+      instructor: "Professor Davis",
+      instructorAvg: 3.8
+    }
+  ];
 };
 
 /**
@@ -183,4 +234,54 @@ export const getClasses = async (): Promise<Class[]> => {
             .then(res => resolve(res))
             .catch(e => reject(e))
     })
+};
+
+/**
+ * Interface for the assistant response
+ */
+export interface AssistantResponse {
+  message: Message;
+  timestamp: Date;
+}
+
+/**
+ * Send messages to the AI assistant and get a response
+ * @param messages - Array of Message objects containing the conversation history
+ * @returns Promise resolving to an assistant response message
+ */
+export const sendMessageToAssistant = async (messages: Message[]): Promise<AssistantResponse> => {
+  try {
+    const response = await fetch(CHAT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ messages }),
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Error communicating with assistant: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    
+    return {
+      message: {
+        role: 'assistant',
+        content: data.response || 'I apologize, but I was unable to process your request.'
+      },
+      timestamp: new Date()
+    };
+  } catch (error) {
+    console.error('Error sending message to assistant:', error);
+    
+    // Return a fallback response in case of errors
+    return {
+      message: {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error while processing your request. Please try again later.'
+      },
+      timestamp: new Date()
+    };
+  }
 };

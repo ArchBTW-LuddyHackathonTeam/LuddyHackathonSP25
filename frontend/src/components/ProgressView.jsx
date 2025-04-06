@@ -1,5 +1,10 @@
-import React from 'react';
-import { getNodeCompletion, getNodeStatusIcon, getNodeType } from './utils';
+import React, { useState, useEffect } from 'react';
+import { 
+  getNodeCompletion, 
+  getNodeStatusIcon, 
+  getNodeType 
+} from './utils';
+import { Attribute } from '../services/api';
 
 const ProgressView = ({
   nodeMap,
@@ -14,8 +19,68 @@ const ProgressView = ({
   setActiveTab,
   handleSpecializationChange
 }) => {
-  // Find a node by ID
-  const findNodeById = (id) => nodeMap[id];
+  // State for tracked categories
+  const [categories, setCategories] = useState({
+    generalEducation: null,
+    majorRequirements: [],
+    specialization: null
+  });
+
+  // Find nodes dynamically by title or function
+  useEffect(() => {
+    const findCategories = () => {
+      // Get all top-level nodes
+      const rootNodes = Object.values(nodeMap).filter(node => 
+        !Object.values(nodeMap).some(n => 
+          n.preRecs && (
+            (Array.isArray(n.preRecs) && n.preRecs.includes(node.id)) ||
+            (Array.isArray(n.preRecs) && n.preRecs.some(p => typeof p === 'object' && p.id === node.id))
+          )
+        )
+      );
+
+      // Find nodes by their title patterns
+      let generalEducation = null;
+      let majorRequirements = [];
+      let specialization = null;
+
+      Object.values(nodeMap).forEach(node => {
+        if (node.titleValue) {
+          // Look for General Education
+          if (node.titleValue.includes("General Education") || 
+              node.titleValue.includes("Gen Ed") || 
+              node.titleValue.includes("Requirements")) {
+            generalEducation = node;
+          }
+          
+          // Look for Major Requirements
+          if (node.titleValue.includes("Computer Science") || 
+              node.titleValue.includes("Mathematics") ||
+              node.titleValue.includes("Major") ||
+              node.titleValue.includes("Core") ||
+              (node.numberValue && node.titleValue.includes("credits"))) {
+            majorRequirements.push(node);
+          }
+          
+          // Look for Specialization
+          if (node.titleValue.includes("Specialization") || 
+              node.dropdownChildren) {
+            specialization = node;
+          }
+        }
+      });
+
+      setCategories({
+        generalEducation,
+        majorRequirements: majorRequirements.filter(Boolean),
+        specialization
+      });
+    };
+
+    if (Object.keys(nodeMap).length > 0) {
+      findCategories();
+    }
+  }, [nodeMap]);
 
   // Get progress percentage
   const getProgressPercentage = () => {
@@ -28,25 +93,37 @@ const ProgressView = ({
     const attrClasses = completedClasses[attribute] || [];
     let credits = 0;
     
-    // Only calculate if we have courses in the nodeMap for this attribute
-    const nodeWithAttr = Object.values(nodeMap).find(node => 
+    // Find node with the specified attribute
+    const nodes = Object.values(nodeMap).filter(node => 
       node.attributes && node.attributes.includes(attribute)
     );
     
-    if (nodeWithAttr && attrClasses.length > 0) {
-      // We'd need to get actual course data here, but for now just estimate
-      credits = attrClasses.length * 3; // Assuming 3 credits per course 
+    if (nodes.length > 0 && attrClasses.length > 0) {
+      // We would need to get the course data here, but as a fallback
+      // we can estimate based on typical credit values
+      const courseData = {};
+      
+      // Check if we have filtered course data for this attribute
+      Object.values(nodeMap).forEach(node => {
+        if (node.attributes && node.attributes.includes(attribute)) {
+          // For nodes with known credit values, we use those
+          if (node.numberValue) {
+            credits += Math.min(
+              attrClasses.length * 3, // Assuming 3 credits per course
+              node.numberValue // Cap at the required credits
+            );
+          } else {
+            credits += attrClasses.length * 3; // Default to 3 credits per course
+          }
+        }
+      });
     }
     
     return credits;
   };
-
-  // Organize nodes by categories
-  const generalEducation = findNodeById(4);
-  const majorRequirements = [findNodeById(17), findNodeById(18)];
-  const specialization = findNodeById(19);
   
   const progressPercentage = getProgressPercentage();
+  const { generalEducation, majorRequirements, specialization } = categories;
   
   return (
     <div className="space-y-8 p-6">
@@ -80,7 +157,13 @@ const ProgressView = ({
           <h2 className="text-xl font-semibold mb-4">{generalEducation.titleValue}</h2>
           
           <div className="space-y-4">
-            {generalEducation.children.map(child => {
+            {generalEducation.preRecs && generalEducation.preRecs.map(childIdOrNode => {
+              // Handle both ID references and Node objects
+              const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+              const child = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+              
+              if (!child) return null;
+              
               const completion = getNodeCompletion(child, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
               const nodeType = getNodeType(child);
               const statusIcon = getNodeStatusIcon(child, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
@@ -154,53 +237,55 @@ const ProgressView = ({
       )}
       
       {/* Major Requirements */}
-      <div className="bg-white rounded-xl p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Major Requirements</h2>
-        
-        <div className="space-y-4">
-          {majorRequirements.map(req => {
-            if (!req) return null;
-            
-            const completion = getNodeCompletion(req, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
-            const inputValue = parseInt(nodeInputValues[req.id]) || 0;
-            const progressValue = req.numberValue ? (inputValue / req.numberValue) * 100 : 0;
-            
-            return (
-              <div 
-                key={req.id} 
-                className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
-                onClick={() => {
-                  setSelectedNode(req.id);
-                  setActiveTab("tree");
-                }}
-              >
-                <div className="flex-shrink-0">
-                  {getNodeStatusIcon(req, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {req.titleValue}
-                    </p>
-                    <p className="text-sm text-gray-500">
-                      {req.numberValue ? `${inputValue}/${req.numberValue}` : ""}
-                    </p>
+      {majorRequirements.length > 0 && (
+        <div className="bg-white rounded-xl p-6 shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Major Requirements</h2>
+          
+          <div className="space-y-4">
+            {majorRequirements.map(req => {
+              if (!req) return null;
+              
+              const completion = getNodeCompletion(req, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap);
+              const inputValue = parseInt(nodeInputValues[req.id]) || 0;
+              const progressValue = req.numberValue ? (inputValue / req.numberValue) * 100 : 0;
+              
+              return (
+                <div 
+                  key={req.id} 
+                  className="flex items-center space-x-4 p-3 rounded-lg hover:bg-gray-50 cursor-pointer"
+                  onClick={() => {
+                    setSelectedNode(req.id);
+                    setActiveTab("tree");
+                  }}
+                >
+                  <div className="flex-shrink-0">
+                    {getNodeStatusIcon(req, completedNodes, nodeInputValues, selectedClasses, selectedSpecialization, nodeMap)}
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
-                    <div 
-                      className={`h-1.5 rounded-full ${
-                        completion === "complete" ? "bg-green-500" : 
-                        completion === "partial" ? "bg-blue-500" : "bg-gray-300"
-                      }`}
-                      style={{ width: `${progressValue}%` }}
-                    ></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {req.titleValue}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {req.numberValue ? `${inputValue}/${req.numberValue}` : ""}
+                      </p>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2">
+                      <div 
+                        className={`h-1.5 rounded-full ${
+                          completion === "complete" ? "bg-green-500" : 
+                          completion === "partial" ? "bg-blue-500" : "bg-gray-300"
+                        }`}
+                        style={{ width: `${progressValue}%` }}
+                      ></div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
       
       {/* Specialization */}
       {specialization && (
@@ -214,8 +299,11 @@ const ProgressView = ({
               onChange={(e) => handleSpecializationChange(specialization.id, parseInt(e.target.value))}
             >
               <option value="">Select a specialization</option>
-              {specialization.preRecs && specialization.preRecs.map(childId => {
-                const childNode = findNodeById(childId);
+              {specialization.preRecs && specialization.preRecs.map(childIdOrNode => {
+                // Handle both ID references and Node objects
+                const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+                
                 return childNode ? (
                   <option key={childId} value={childId}>
                     {childNode.titleValue}
@@ -225,21 +313,28 @@ const ProgressView = ({
             </select>
           </div>
           
-          {selectedSpecialization[specialization.id] && (
+          {selectedSpecialization[specialization.id] && specialization.preRecs && (
             <div className="space-y-3">
               {specialization.preRecs
-                .filter(id => id === selectedSpecialization[specialization.id])
-                .map(id => {
-                  const childNode = findNodeById(id);
+                .filter(childIdOrNode => {
+                  const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                  return childId === selectedSpecialization[specialization.id];
+                })
+                .map(childIdOrNode => {
+                  const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+                  const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
+                  
                   if (!childNode) return null;
                   
                   return (
-                    <div key={id} className="space-y-2">
+                    <div key={childId} className="space-y-2">
                       <h3 className="font-medium text-lg">{childNode.titleValue} Requirements</h3>
                       
                       <div className="space-y-2 pl-4">
-                        {childNode.preRecs && childNode.preRecs.map(reqId => {
-                          const req = findNodeById(reqId);
+                        {childNode.preRecs && childNode.preRecs.map(reqIdOrNode => {
+                          const reqId = typeof reqIdOrNode === 'object' ? reqIdOrNode.id : reqIdOrNode;
+                          const req = typeof reqIdOrNode === 'object' ? reqIdOrNode : nodeMap[reqId];
+                          
                           if (!req) return null;
                           
                           return (

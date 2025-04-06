@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
+import { sendMessageToAssistant } from '../services/api';
 
 const AssistantContext = createContext();
 
@@ -7,27 +8,11 @@ export const useAssistant = () => useContext(AssistantContext);
 export const AssistantProvider = ({ children, userData, messages, setMessages, isTyping, setIsTyping }) => {
   // Messages in the format [{role: "user", content: "..."}, {role: "assistant", content: "..."}]
   const [messageHistory, setMessageHistory] = useState([
-    { role: "assistant", content: "Hello! I'm your degree planning assistant. I can help you with course recommendations, scheduling advice, and understanding your degree requirements. What can I help you with today?" }
-  ]);
-
-  // Function to get assistant responses based on user input
-  const getAssistantResponse = (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('recommend') || lowerMessage.includes('suggest')) {
-      return "Based on your progress, I'd recommend focusing on completing your General Education Requirements first, particularly the Arts and Humanities courses. HIST 101 (Introduction to History) has great reviews and fulfills the A&H requirement.";
-    } else if (lowerMessage.includes('specialization') || lowerMessage.includes('focus')) {
-      return "For Computer Science, you have two specialization options: Software Engineering and Systems. Software Engineering focuses more on development methodology and large-scale applications, while Systems delves deeper into hardware interactions and optimization. Based on your current courses, Software Engineering might align better with your interests.";
-    } else if (lowerMessage.includes('progress') || lowerMessage.includes('how am i doing')) {
-      return "You're making good progress! You've completed about 42% of your degree requirements. To stay on track for graduation in 4 years, try to complete at least 30 credits per academic year.";
-    } else if (lowerMessage.includes('difficult') || lowerMessage.includes('hard') || lowerMessage.includes('challenging')) {
-      return "Some of the more challenging courses in your upcoming requirements might be CSCI 403 (Advanced Algorithms) and MATH 375 (Linear Algebra). I'd recommend balancing your schedule by not taking both in the same semester.";
-    } else if (lowerMessage.includes('hello') || lowerMessage.includes('hi')) {
-      return "Hello! How can I assist with your degree planning today? I can help with course recommendations, requirement explanations, or scheduling advice.";
-    } else {
-      return "I understand you're asking about your degree plan. To give you more specific guidance, could you tell me what aspect you're interested in? For example, I can help with course recommendations, scheduling, or explaining specific requirements.";
+    { 
+      role: "assistant", 
+      content: "Hello! I'm your degree planning assistant. I can help you with course recommendations, scheduling advice, and understanding your degree requirements. What can I help you with today?" 
     }
-  };
+  ]);
 
   // Function to prepare a comprehensive summary of user progress data
   const prepareUserDataSummary = () => {
@@ -134,12 +119,14 @@ export const AssistantProvider = ({ children, userData, messages, setMessages, i
             }
             
             if (course) {
-              summary += `- ${course.code}: ${course.name}`;
-              summary += ` (${course.credits} credits, Professor: ${course.professor})`;
+              summary += `- ${course.code}: ${course.name || 'Unnamed Course'}`;
+              summary += ` (${course.credits} credits, Instructor: ${course.instructor})`;
               if (course.attributes && course.attributes.length > 0) {
                 summary += ` [${course.attributes.join(", ")}]`;
               }
-              summary += `\n  Schedule: ${course.days.join(", ")} at ${course.time}, Location: ${course.location}\n`;
+              if (course.days) {
+                summary += `\n  Schedule: ${course.days} at ${course.time || 'TBD'}, Location: ${course.location || 'TBD'}\n`;
+              }
               
               // Add a condensed description if available
               if (course.description) {
@@ -175,8 +162,8 @@ export const AssistantProvider = ({ children, userData, messages, setMessages, i
             }
             
             if (course) {
-              summary += `- ${course.code}: ${course.name}`;
-              summary += ` (${course.credits} credits, Professor: ${course.professor})`;
+              summary += `- ${course.code}: ${course.name || 'Unnamed Course'}`;
+              summary += ` (${course.credits} credits, Instructor: ${course.instructor})`;
               if (course.attributes && course.attributes.length > 0) {
                 summary += ` [${course.attributes.join(", ")}]`;
               }
@@ -282,12 +269,14 @@ export const AssistantProvider = ({ children, userData, messages, setMessages, i
         
         if (courseData.length > 0) {
           courseData.forEach(course => {
-            summary += `  * ${course.code}: ${course.name}`;
-            summary += ` (${course.credits} credits, Professor: ${course.professor})`;
+            summary += `  * ${course.code}: ${course.name || 'Unnamed Course'}`;
+            summary += ` (${course.credits} credits, Instructor: ${course.instructor})`;
             if (course.attributes && course.attributes.length > 0) {
               summary += ` [${course.attributes.join(", ")}]`;
             }
-            summary += `\n    Schedule: ${course.days.join(", ")} at ${course.time}, Location: ${course.location}\n`;
+            if (course.days) {
+              summary += `\n    Schedule: ${course.days} at ${course.time || 'TBD'}, Location: ${course.location || 'TBD'}\n`;
+            }
           });
         } else {
           // Fallback if course data isn't available
@@ -308,7 +297,7 @@ export const AssistantProvider = ({ children, userData, messages, setMessages, i
   };
 
   // Send a message to the assistant and handle the entire conversation flow
-  const sendMessageWithUserData = (messageText) => {
+  const sendMessageWithUserData = async (messageText) => {
     if (!messageText.trim()) return;
     
     // Create new user message
@@ -336,25 +325,33 @@ export const AssistantProvider = ({ children, userData, messages, setMessages, i
     // Set typing indicator
     setIsTyping(true);
     
-    // Log the conversation history that would be sent to the API
-    console.log("Messages that would be sent to AI:", updatedHistory);
-    
-    // Simulate assistant response with delay
-    setTimeout(() => {
+    try {
+      // Send the message to the assistant API
+      const response = await sendMessageToAssistant(updatedHistory);
+      
       // Add assistant response to message history for API
-      const assistantResponse = { role: "assistant", content: getAssistantResponse(messageText) };
+      const assistantResponse = response.message;
       setMessageHistory(prev => [...prev, assistantResponse]);
       
       // Add assistant response to UI messages
       setMessages(prev => [...prev, {
         sender: 'assistant',
         content: assistantResponse.content,
+        timestamp: response.timestamp
+      }]);
+    } catch (error) {
+      console.error('Error communicating with assistant API:', error);
+      
+      // Add a fallback error message
+      setMessages(prev => [...prev, {
+        sender: 'assistant',
+        content: 'I apologize, but I encountered an error while processing your request. Please try again later.',
         timestamp: new Date()
       }]);
-      
+    } finally {
       // Turn off typing indicator
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   return (
