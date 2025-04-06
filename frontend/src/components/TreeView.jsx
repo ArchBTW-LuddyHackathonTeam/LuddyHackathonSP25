@@ -109,11 +109,11 @@ const TreeView = ({
                               {course.instructorAvg.toFixed(1)}
                             </div>
                           )}
-                          {course.attributes && course.attributes.map(attr => {
+                          {course.attributes && course.attributes.map((attr, attrIndex) => {
                             // Convert API attribute format (e.g., "A&H") to internal key (e.g., "AH")
                             const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attr);
                             return attrKey && AttributeColors[attrKey] && (
-                              <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
+                              <div key={`${attr}-${attrIndex}`} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
                                 {AttributeColors[attrKey].icon}
                                 <span className="ml-1">{attr}</span>
                               </div>
@@ -347,7 +347,11 @@ const TreeView = ({
               {/* Attribute tags */}
               {(nodeType === "attribute" || nodeType === "attribute-with-number") && node.attributes && (
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {node.attributes.map(attr => renderAttributeTag(attr))}
+                  {node.attributes.map((attr, index) => (
+                    <div key={`${attr}-${index}`}>
+                      {renderAttributeTag(attr)}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -501,11 +505,11 @@ const TreeView = ({
                               <div className="px-2 py-1 rounded bg-gray-100 text-sm">
                                 <span className="font-medium">{course.credits}</span> credits
                               </div>
-                              {course.attributes && course.attributes.map(attr => {
+                              {course.attributes && course.attributes.map((attr, attrIndex) => {
                                 // Convert API attribute format to internal key
                                 const attrKey = Object.keys(Attribute).find(key => Attribute[key] === attr);
                                 return attrKey && AttributeColors[attrKey] && (
-                                  <div key={attr} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
+                                  <div key={`${attr}-${attrIndex}`} className={`px-2 py-1 text-xs rounded-full flex items-center ${AttributeColors[attrKey].bg} ${AttributeColors[attrKey].text} ${AttributeColors[attrKey].border}`}>
                                     {AttributeColors[attrKey].icon}
                                     <span className="ml-1">{attr}</span>
                                   </div>
@@ -547,22 +551,18 @@ const TreeView = ({
         {/* Children nodes */}
         {isExpanded && hasChildren && (
           <div className="pl-10 mt-2 space-y-2">
-            {node.preRecs.map(childIdOrNode => {
-              // Handle both ID references and Node objects
-              const childId = typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
-              const childNode = typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
-              
+            {node.preRecs.map((childIdOrNode, index) => {
+              const childId =
+                typeof childIdOrNode === 'object' ? childIdOrNode.id : childIdOrNode;
+              const childNode =
+                typeof childIdOrNode === 'object' ? childIdOrNode : nodeMap[childId];
               if (!childNode) return null;
               
-              // For dropdown nodes, only show children if a selection has been made
-              if (nodeType === "dropdown") {
-                // Only render the selected child
-                if (selectedSpecialization[node.id] === childId) {
-                  return renderModernNode(childNode, level + 1);
-                }
-                return null;
-              }
-              return renderModernNode(childNode, level + 1);
+              return (
+                <React.Fragment key={`${childId}-${index}`}>
+                  {renderModernNode(childNode, level + 1)}
+                </React.Fragment>
+              );
             })}
           </div>
         )}
@@ -610,7 +610,11 @@ const TreeView = ({
         transition: 'transform 0.3s ease',
       }}
     >
-      {treeData.map(node => renderNode(node))}
+      {treeData.map(node => (
+        <React.Fragment key={node.id}>
+          {renderNode(node)}
+        </React.Fragment>
+      ))}
     </div>
   );
 };

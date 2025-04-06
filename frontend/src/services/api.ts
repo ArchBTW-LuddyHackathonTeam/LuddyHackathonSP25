@@ -50,7 +50,7 @@ export interface Message {
 
 // API Endpoints - TODO: Replace with actual endpoints
 const API_BASE_URL = 'http://localhost:3000';
-const NODE_ENDPOINT = `${API_BASE_URL}/nodes`;
+const NODE_ENDPOINT = `${API_BASE_URL}/node`;
 const CLASS_ENDPOINT = `${API_BASE_URL}/classes`;
 const SCHED_ENDPOINT = `${API_BASE_URL}/scheduler`;
 
@@ -63,18 +63,21 @@ const LOG_PREFIX = '[DegreeExplorer API]';
  * @returns Promise resolving to a Node object with preReqs as IDs
  */
 export const getNodeById = async (id: number): Promise<Node> => {
-  console.log(`${LOG_PREFIX} getNodeById: Fetching node with id ${id}`);
+  console.log(`${LOG_PREFIX} getNodeById: Fetching node with ID: ${id}`);
   try {
-    // Simple dummy implementation
-    const node = {
-      id: id,
-      titleValue: `Node ${id}`,
-      preRecs: [id - 1, id - 2].filter(n => n > 0)
-    };
+    const response = await fetch(`${NODE_ENDPOINT}/${id}`);
+    console.log(`${LOG_PREFIX} getNodeById: Received response with status ${response.status}`);
+    
+    if (!response.ok) {
+      console.error(`${LOG_PREFIX} getNodeById: HTTP error ${response.status}: ${response.statusText}`);
+      throw new Error(`Error fetching node with ID ${id}: ${response.statusText}`);
+    }
+    
+    const node: Node = await response.json();
     console.log(`${LOG_PREFIX} getNodeById: Successfully retrieved node:`, node);
     return node;
   } catch (error) {
-    console.error(`${LOG_PREFIX} getNodeById: Error fetching node ${id}:`, error);
+    console.error(`${LOG_PREFIX} getNodeById: Error fetching node with ID ${id}:`, error);
     throw error;
   }
 };
@@ -128,7 +131,9 @@ export const buildDegreeTree = async (rootId: number): Promise<Node> => {
     
     // Process preReqs if they are IDs (numbers)
     if (node.preRecs && Array.isArray(node.preRecs)) {
-      const preRecsAsNumbers = node.preRecs.filter(preReq => typeof preReq === 'number') as number[];
+      const preRecsAsNumbers = node.preRecs.map(preReq => 
+        typeof preReq === 'number' ? preReq : parseInt(preReq.toString(), 10)
+      ).filter(id => !isNaN(id)) as number[];
       
       if (preRecsAsNumbers.length > 0) {
         console.log(`${LOG_PREFIX} ${indent}buildSubtree: Node ${nodeId} has ${preRecsAsNumbers.length} prerequisites: ${preRecsAsNumbers.join(', ')}`);
@@ -216,25 +221,27 @@ export const getClassesByAttribute = async (attribute: string): Promise<Class[]>
  * @returns Promise resolving to an array of Class objects matching the course IDs
  */
 export const getClassesByCourseIds = async (courseIds: number[]): Promise<Class[]> => {
-    console.log(`${LOG_PREFIX} getClassesByCourseIds: Fetching classes for ${courseIds.length} course IDs:`, courseIds);
-    return new Promise((resolve, reject) => {
-        fetch(`${CLASS_ENDPOINT}/ids`, {
-            method: "POST",
-            body: JSON.stringify({ ids: courseIds })
-        })
-            .then(res => {
-                console.log(`${LOG_PREFIX} getClassesByCourseIds: Received response with status ${res.status}`);
-                return res.json();
-            })
-            .then(res => {
-                console.log(`${LOG_PREFIX} getClassesByCourseIds: Successfully retrieved ${res.length} classes`);
-                resolve(res);
-            })
-            .catch(e => {
-                console.error(`${LOG_PREFIX} getClassesByCourseIds: Error fetching classes:`, e);
-                reject(e);
-            });
-    });
+  console.log(`${LOG_PREFIX} getClassesByCourseIds: Fetching classes for ${courseIds.length} course IDs:`, courseIds);
+  return Promise.all(
+    courseIds.map(async (courseId) => {
+      try {
+        const response = await fetch(`${CLASS_ENDPOINT}/id/${courseId}`);
+        console.log(`${LOG_PREFIX} getClassesByCourseIds: Received response for course ID ${courseId} with status ${response.status}`);
+        
+        if (!response.ok) {
+          console.error(`${LOG_PREFIX} getClassesByCourseIds: HTTP error ${response.status} for course ID ${courseId}: ${response.statusText}`);
+          throw new Error(`Error fetching class with ID ${courseId}: ${response.statusText}`);
+        }
+        
+        const classData: Class = await response.json();
+        console.log(`${LOG_PREFIX} getClassesByCourseIds: Successfully retrieved class for course ID ${courseId}:`, classData);
+        return classData;
+      } catch (error) {
+        console.error(`${LOG_PREFIX} getClassesByCourseIds: Error fetching class for course ID ${courseId}:`, error);
+        throw error;
+      }
+    })
+  );
 };
 
 
