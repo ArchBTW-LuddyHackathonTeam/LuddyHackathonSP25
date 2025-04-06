@@ -125,23 +125,29 @@ type Query {
 type Mutation {
   addDepartment(department: AddDepartmentInput!): Department
   updateDepartment(department: EditDepartmentInput!): Department
+  deleteDepartment(id: ID!): Boolean!
 
   addInstructor(instructor: AddInstructorInput!): Instructor
   updateInstructor(instructor: EditInstructorUpdate!): Instructor
+  deleteInstructor(id: ID!): Boolean!
 
   addCourse(course: AddCourseInput!): Course
   updateCourse(course: EditCourseInput!): Course
+  deleteCourse(id: ID!): Boolean!
 
   addSection(section: AddSectionInput!): Section
   updateSection(section: EditSectioninput!): Section
+  deleteSection(id: ID!): Boolean!
 
   addCourseAttribute(courseAttribute: AddCourseAttributeInput!): CourseAttribute
   updateCourseAttribute(courseAttribute: EditCourseAttributeInput!): CourseAttribute
+  deleteCourseAttribute(id: ID!): Boolean!
 
   addCourseTermOffered(courseTermOffered: AddcourseTermOfferedInput!): Course
 
   addInstructorOfficeHours(officeHour: AddInstructorOfficeHourInput!): OfficeHour
   updateInstructorOfficeHours(officeHour: EditInstructorOfficeHourInput!): OfficeHour
+  deleteInstructorOfficeHours(id: ID!): Boolean!
 
   addCourseSection(relation: AddCourseSectionInput!): Course
 
@@ -151,6 +157,7 @@ type Mutation {
 
   addNode(node: AddNodeInput): Node
   updateNode(node: EditNodeInput): Node
+  deleteNode(id: ID!): Boolean!
 
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!

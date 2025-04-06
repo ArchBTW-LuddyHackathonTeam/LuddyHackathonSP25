@@ -265,17 +265,26 @@ export const resolvers = {
     updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => 
         editEntry("departments", department),
 
+    deleteDepartment: (_parent: any, { id }: { id: number }) => 
+      deleteById("departments", id),
+
     addInstructor: (_parent: any, { instructor }: { instructor: AddInstructorInput }) => 
         addEntry("instructors", instructor),
 
     updateInstructor: (_parent: any, { instructor }: { instructor: EditInstructorInput }) => 
         editEntry("instructors", instructor),
 
+    deleteInstructor: (_parent: any, { id }: { id: number }) => 
+      deleteById("instructors", id),
+
     addCourse: (_parent: any, { course }: { course: AddCourseInput }) => 
         addEntry("courses", course),
 
     updateCourse: (_parent: any, { course }: { course: EditCourseInput }) => 
         editEntry("courses", course),
+
+    deleteCourse: (_parent: any, { id }: { id: number }) => 
+      deleteById("courses", id),
         
     addSection: (_parent: any, { section }: { section: AddSectionInput }) => 
         addEntry("sections", section),
@@ -283,11 +292,17 @@ export const resolvers = {
     updateSection: (_parent: any, { section }: { section: EditSectionInput }) => 
         editEntry("sections", section),
 
+    deleteSection: (_parent: any, { id }: { id: number }) => 
+      deleteById("sections", id),
+
     addCourseAttribute: (_parent: any, { courseAttribute }: { courseAttribute: AddCourseAttributeInput }) => 
         addEntry("course_attributes", courseAttribute),
 
     updateCourseAttribute: (_parent: any, { courseAttribute }: { courseAttribute: EditCourseAttributeInput }) => 
         editEntry("course_attributes", courseAttribute),
+
+    deleteCourseAttribute: (_parent: any, { id }: { id: number }) => 
+      deleteById("course_attributes", id),
 
     addCourseTermOffered: (_parent: any, { courseTermOffered }: { courseTermOffered: AddCourseTermOfferedInput}) => 
         addEntry("courses_terms_offered", courseTermOffered),
@@ -297,6 +312,9 @@ export const resolvers = {
 
     updateInstructorOfficeHours: (_parent: any, { officeHour }: { officeHour: EditInstructorOfficeHoursInput}) => 
         editEntry("office_hours", officeHour),
+
+    deleteInstructorOfficeHours: (_parent: any, { id }: { id: number }) => 
+        deleteById("office_hours", id),
 
     addCourseSection: (_parent: any, { relation }: { relation: AddCourseSectionInput}) => {
         addEntry("course_sections", relation);
@@ -318,6 +336,9 @@ export const resolvers = {
 
     updateNode: (_parent: any, { node }: { node: EditNodeInput }) => 
         editEntry("nodes", node),
+
+    deleteNode: (_parent: any, { id }: { id: number }) => 
+        deleteById("nodes", id),
     
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
