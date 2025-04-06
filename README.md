@@ -31,7 +31,7 @@ With a robust design in place, our next step was to transform these concepts int
 
 - A personalized AI assistant for all scheduling needs
 
-    - A powerful AI chatbot is integrated into the entire scheduling process with access to your requirements and what you have already fulfilled
+    - A powerful AI chatbot is integrated into the scheduling process. It accesses your completed courses and remaining requirements to generate intelligent, personalized advising suggestions.
 
 ## 📝 Getting Started
 
