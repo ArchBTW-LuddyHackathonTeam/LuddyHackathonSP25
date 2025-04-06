@@ -115,7 +115,6 @@ CREATE TABLE nodes (
 CREATE TABLE node_prerequisites (
     node_id INTEGER NOT NULL,
     prerequisite_node_id INTEGER NOT NULL,
-    PRIMARY KEY (node_id, prerequisite_node_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (prerequisite_node_id) REFERENCES nodes(id)
 );
@@ -123,7 +122,6 @@ CREATE TABLE node_prerequisites (
 CREATE TABLE node_attribute_mapping (
     node_id INTEGER NOT NULL,
     attribute_id INTEGER NOT NULL,
-    PRIMARY KEY (node_id, attribute_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (attribute_id) REFERENCES course_attributes(id)
 );
@@ -132,7 +130,6 @@ CREATE TABLE node_attribute_mapping (
 CREATE TABLE node_course_mapping (
     node_id INTEGER NOT NULL,
     course_id INTEGER NOT NULL,
-    PRIMARY KEY (node_id, course_id),
     FOREIGN KEY (node_id) REFERENCES nodes(id),
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );
