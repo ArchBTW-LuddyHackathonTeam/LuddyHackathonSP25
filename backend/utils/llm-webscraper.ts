@@ -10,8 +10,8 @@ import { HNSWDb } from '@llm-tools/embedjs-hnswlib';
 export function queryPrompt(input: string): Promise<string> {
   return new Promise(async (resolve, reject) => {
     try {
-      const instructions = "tell me everything you see now in detail";
-      const fixedUrlContent = "https://scheduler.lillie.rs/classes/id/1";
+      const instructions = "You are an academic advisor. Use what you see as reference.";
+      const fixedUrlContent = "https://scheduler.lillie.rs/classes/";
       
       const ragApplication = await new RAGApplicationBuilder()
         .setModel(new OpenAi({ model: "gpt-3.5-turbo" }))
