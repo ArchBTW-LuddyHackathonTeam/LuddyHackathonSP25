@@ -1,128 +1,152 @@
--- Insert dummy departments
-INSERT INTO departments (name, abbreviation, description) VALUES 
-  ('Computer Science', 'CS', 'Department of Computer Science'),
-  ('Mathematics', 'MATH', 'Department of Mathematics'),
-  ('Physics', 'PHY', 'Department of Physics');
+-- Insert data into departments
+INSERT INTO departments (name, abbreviation, description) VALUES
+('Computer Science', 'CS', 'Department of Computer Science'),
+('Mathematics', 'MATH', 'Department of Mathematics'),
+('Languages', 'LANG', 'Department of Languages'),
+('Humanities', 'HUM', 'Department of Humanities');
 
--- Insert dummy instructors
+-- Insert data into courses
+INSERT INTO courses (department_id, course_code, instruction_mode, credits, description) VALUES
+(1, '101', 'In-person', 3, 'Introduction to Computer Science'),
+(1, '102', 'Online', 4, 'Data Structures'),
+(1, '103', 'In-person', 4, 'Algorithms'),
+(2, '101', 'In-person', 4, 'Calculus I'),
+(2, '102', 'Online', 4, 'Calculus II'),
+(3, '101', 'In-person', 3, 'Beginner French'),
+(4, '101', 'In-person', 3, 'Introduction to Philosophy');
+
+-- Insert data into instructors
 INSERT INTO instructors (name, department_id) VALUES
-  ('Alice Smith', 1),
-  ('Bob Johnson', 2),
-  ('Charlie Brown', 1),
-  ('Dana White', 3);
+('Alice Smith', 1),
+('Bob Johnson', 2),
+('Carol Williams', 3),
+('David Brown', 4);
 
--- Insert dummy instructor reviews
+-- Insert data into instructor reviews
 INSERT INTO instructor_reviews (instructor_id, quality_score, difficulty_score, review) VALUES
-  (1, 5, 3, 'Excellent teaching with clear explanations.'),
-  (1, 4, 4, 'Very approachable and knowledgeable.'),
-  (2, 3, 5, 'Challenging course, but very rewarding.'),
-  (3, 4, 2, 'Engaging lectures and supportive office hours.'),
-  (4, 5, 4, 'Highly recommended for students interested in physics.');
+(1, 5, 3, 'Great instructor with clear explanations.'),
+(1, 4, 4, 'Good course material but challenging.'),
+(2, 3, 2, 'Okay instructor, could improve pacing.'),
+(3, 4, 5, 'Excellent language teaching methods.'),
+(4, 5, 3, 'Engaging and thoughtful lectures.');
 
--- Insert dummy office hours
+-- Insert data into office hours
 INSERT INTO office_hours (instructor_id, days_of_week, time_of_day, type) VALUES
-  (1, 'Monday,Wednesday', '2:00 PM - 3:00 PM', 'In-person'),
-  (2, 'Tuesday', '10:00 AM - 12:00 PM', 'Virtual'),
-  (3, 'Thursday', '1:00 PM - 2:00 PM', 'In-person'),
-  (4, 'Friday', '3:00 PM - 5:00 PM', 'In-person');
+(1, 'Monday', '2:00 PM - 3:00 PM', 'In-person'),
+(2, 'Tuesday', '11:00 AM - 1:00 PM', 'Online'),
+(3, 'Wednesday', '1:00 PM - 2:00 PM', 'In-person'),
+(4, 'Thursday', '4:00 PM - 5:00 PM', 'In-person');
 
--- Insert dummy sections (existing)
+-- Insert data into sections
 INSERT INTO sections (days_of_week, time_of_day, type) VALUES
-  ('Monday,Wednesday,Friday', '9:00 AM - 10:00 AM', 'Lecture'),
-  ('Tuesday,Thursday', '1:00 PM - 2:30 PM', 'Lab'),
-  ('Monday,Wednesday', '11:00 AM - 12:30 PM', 'Lecture');
+('Monday,Wednesday,Friday', '9:00 AM - 10:00 AM', 'Lecture'),
+('Tuesday,Thursday', '2:00 PM - 3:30 PM', 'Lab'),
+('Monday,Wednesday', '11:00 AM - 12:30 PM', 'Lecture');
 
--- Insert additional sections for new courses
-INSERT INTO sections (days_of_week, time_of_day, type) VALUES
-  ('Tuesday,Thursday', '3:00 PM - 4:30 PM', 'Lecture'),
-  ('Monday,Wednesday,Friday', '1:00 PM - 2:00 PM', 'Lecture');
-
--- Insert dummy courses (original set)
-INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
-  (1, 'CS101', 'In-person', 3, 'Introduction to Computer Science', 1),
-  (1, 'CS201', 'Hybrid', 4, 'Data Structures and Algorithms', 3),
-  (2, 'MATH101', 'In-person', 3, 'Calculus I', 2),
-  (3, 'PHY101', 'Virtual', 4, 'Fundamentals of Physics', 4);
-
--- Insert new courses to enhance prerequisite testing
--- Note: IDs for new courses will auto-increment; assuming the original courses got IDs 1-4, these become 5 and onward.
-INSERT INTO courses (department_id, course_code, instruction_mode, credits, description, instructor_id) VALUES
-  (1, 'CS301', 'In-person', 3, 'Advanced Algorithms', 1),        -- ID 5
-  (1, 'CS401', 'Hybrid', 4, 'Machine Learning', 3),              -- ID 6
-  (2, 'MATH201', 'In-person', 3, 'Linear Algebra', 2),        -- ID 7
-  (2, 'MATH301', 'In-person', 3, 'Differential Equations', 2),     -- ID 8
-  (3, 'PHY201', 'Virtual', 4, 'Quantum Physics', 4);               -- ID 9
-
--- Insert courses offered for above courses
+-- Insert data into courses terms offered
 INSERT INTO courses_terms_offered (course_id, term_offered) VALUES
-  (1, 'Fall'),
-  (1, 'Spring'),
-  (2, 'Spring'),
-  (3, 'Fall'),
-  (3, 'Spring'),
-  (4, 'Spring'),
-  (5, 'Fall'),
-  (6, 'Spring'),
-  (7, 'Fall'),
-  (7, 'Spring'),
-  (8, 'Spring'),
-  (9, 'Fall');
+(1, 'Fall'),
+(1, 'Spring'),
+(2, 'Fall'),
+(3, 'Spring'),
+(4, 'Fall'),
+(5, 'Summer'),
+(6, 'Spring'),
+(7, 'Fall');
 
--- Insert dummy course_sections (original mappings)
+-- Insert data into course sections
 INSERT INTO course_sections (course_id, section_id) VALUES
-  (1, 1),
-  (1, 3),
-  (2, 1),
-  (3, 2),
-  (4, 3);
+(1, 1),
+(1, 2),
+(2, 3),
+(3, 1),
+(4, 2),
+(5, 3),
+(6, 1);
 
--- Map new courses to sections (using newly inserted section IDs 4 and 5 along with some existing ones)
-INSERT INTO course_sections (course_id, section_id) VALUES
-  (5, 4),   -- CS301 with new Lecture section
-  (6, 5),   -- CS401 with new Lecture section
-  (7, 4),   -- MATH201 using section 4
-  (8, 1),   -- MATH301 using existing Lecture
-  (9, 5);   -- PHY201 using section 5
-
--- Insert dummy course_prerequisites (original prerequisites)
+-- Insert data into course prerequisites
 INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES
-  (2, 1),   -- CS201 requires CS101
-  (4, 3);   -- PHY101 requires MATH101
+(2, 1),
+(3, 1),
+(5, 4);
 
--- Insert additional course prerequisites for new courses
-INSERT INTO course_prerequisites (course_id, prerequisite_course_id) VALUES
-  (5, 2),   -- CS301 requires CS201
-  (6, 2),   -- CS401 requires CS201
-  (6, 3),   -- CS401 also requires MATH101
-  (7, 3),   -- MATH201 requires MATH101
-  (8, 7),   -- MATH301 requires MATH201
-  (9, 4),   -- PHY201 requires PHY101
-  (9, 7);   -- PHY201 also requires MATH201
-
--- Insert dummy course attributes
+-- Insert data into course attributes
 INSERT INTO course_attributes (name, description) VALUES
-  ('Lab Required', 'This course includes a lab component'),
-  ('Writing Intensive', 'Significant writing assignments included'),
-  ('Project Based', 'Course involves group projects and presentations');
+('A&H', 'Arts & Humanities'),
+('S&H', 'Social & Historical Studies'),
+('WC', 'World Culture'),
+('WL', 'World Language'),
+('N&M', 'Natural & Mathematical Science'),
+('IW', 'Intensive Writing'),
+('EC', 'English Composition'),
+('MM', 'Mathematical Modeling');
 
--- Map courses to attributes
+-- Insert data into course attribute mapping
 INSERT INTO course_attribute_mapping (course_id, attribute_id) VALUES
-  (1, 3),    -- CS101: Project Based
-  (2, 1),    -- CS201: Lab Required
-  (2, 3),    -- CS201: Project Based
-  (3, 2),    -- MATH101: Writing Intensive
-  (4, 1),    -- PHY101: Lab Required
-  (6, 3),    -- CS401: Project Based
-  (7, 1);    -- MATH201: Lab Required
+(1, 1),
+(2, 8),
+(3, 5),
+(4, 8),
+(5, 5),
+(6, 4),
+(7, 1);
 
--- Insert dummy nodes (e.g., representing degrees or programs)
-INSERT INTO nodes (id, title) VALUES
-  (1, 'Bachelor of Science in Computer Science'),
-  (2, 'Bachelor of Science in Mathematics'),
-  (3, 'Master of Science in Physics');
+-- Insert data into nodes
+INSERT INTO nodes (id, title, number, course_id, dropdown_children, department_id) VALUES
+(1, 'Computer Science BS', NULL, NULL, 0, 1),
+(3, 'Bachelors of Science', NULL, NULL, 0, NULL),
+(4, 'General Education Requirements', NULL, NULL, 0, NULL),
+(5, 'Complete One English Composition Course', 3, NULL, 0, NULL),
+(6, 'Complete One Mathematical Modeling Course', 3, NULL, 0, NULL),
+(7, 'Complete 6 credits of Arts and Humanities courses', 6, NULL, 0, NULL),
+(8, 'Complete 6 credits of Social and Historical Studies courses', 6, NULL, 0, NULL),
+(9, 'Complete 5 credits of Natural and Mathematical Science courses', 5, NULL, 0, NULL),
+(10, 'World Languages & Cultures Requirement', NULL, NULL, 1, NULL),
+(11, 'Language Study', 3, NULL, 0, NULL),
+(12, 'Complete 6 credits of World Culture courses', 6, NULL, 0, NULL),
+(13, 'Study Abroad Program', NULL, NULL, 0, NULL),
+(15, 'Complete 120 credit hours', 120, NULL, 0, NULL),
+(16, 'Complete 36 credits at 300-400 level', 36, NULL, 0, NULL),
+(17, 'Complete 40 credits in Computer science core courses', 40, NULL, 0, NULL),
+(18, 'Complete 16 credits in Mathematics courses', 16, NULL, 0, NULL),
+(19, 'Computer Science Specialization', NULL, NULL, 1, NULL),
+(20, 'Software Engineering', NULL, NULL, 0, NULL),
+(21, 'CSCI-B 461 Database Concepts', 3, 1, 0, 1),
+(22, 'CSCI-P 465 Software Engineering for Information Systems', 3, 2, 0, 1),
+(23, 'Select one course from the following:', 3, NULL, 0, NULL),
+(25, 'Select one course from the following:', 3, NULL, 0, NULL),
+(26, 'Select one course from the following:', 3, NULL, 0, NULL),
+(27, 'Select one additional P course', 3, NULL, 0, NULL),
+(28, 'Systems', NULL, NULL, 0, NULL),
+(29, 'CSCI-C 291 System Programming with C and Unix', 3, 3, 0, 1),
+(30, 'CSCI-C 335 Computer Structures', 3, 4, 0, 1),
+(31, 'Select one project course from the following:', 3, NULL, 0, NULL),
+(33, 'Select one additional systems course from the following (Not used for project course):', 3, NULL, 0, NULL),
+(34, 'Select one course from the following:', 3, NULL, 0, NULL);
 
--- Insert dummy node prerequisites (e.g., a master's program requiring bachelor's degrees)
+-- Insert data into node prerequisites
 INSERT INTO node_prerequisites (node_id, prerequisite_node_id) VALUES
-  (3, 1),
-  (3, 2);
+(1, 3),
+(1, 17),
+(1, 18),
+(1, 19),
+(3, 4),
+(3, 15),
+(3, 16),
+(19, 20),
+(19, 28);
 
+-- Insert data into node attribute mapping
+INSERT INTO node_attribute_mapping (node_id, attribute_id) VALUES
+(5, 6),
+(6, 8),
+(7, 1),
+(8, 2),
+(9, 5),
+(10, 4),
+(10, 3);
+
+-- Insert data into node course mapping
+INSERT INTO node_course_mapping (node_id, course_id) VALUES
+(21, 1),
+(22, 2);
