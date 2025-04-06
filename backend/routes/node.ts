@@ -42,7 +42,7 @@ interface Node {
     course_id?: number;
     dropdownChildren?: boolean;
     department: { abbreviation?: string };
-    preRecs: number[];
+    prerequisite_ids: number[];
 }
 
 const router = Router();
@@ -64,8 +64,10 @@ router.get("/:id", async (req, res) => {
 
         const response: NodeResponse = {
             id: temp.id,
-            preRecs: temp.preRecs,
+            preRecs: temp.prerequisite_ids,
         };
+
+        console.log(response, temp);
 
         if (temp.title) {
             response.titleValue = temp.title;
