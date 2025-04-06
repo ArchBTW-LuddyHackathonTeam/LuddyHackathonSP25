@@ -61,7 +61,7 @@ CREATE TABLE courses (
 -- Table for strings of terms offered for courses (one to many)
 CREATE TABLE courses_terms_offered (
     course_id INTEGER NOT NULL,
-    terms_offered TEXT NOT NULL,
+    term_offered TEXT NOT NULL,
     FOREIGN KEY (course_id) REFERENCES courses(id)
 );
 
@@ -78,7 +78,6 @@ CREATE TABLE course_sections (
 CREATE TABLE course_prerequisites (
     course_id INTEGER NOT NULL,
     prerequisite_course_id INTEGER NOT NULL,
-    PRIMARY KEY (course_id, prerequisite_course_id),
     FOREIGN KEY (course_id) REFERENCES courses(id),
     FOREIGN KEY (prerequisite_course_id) REFERENCES courses(id)
 );

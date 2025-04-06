@@ -54,7 +54,7 @@ INSERT INTO courses (department_id, course_code, instruction_mode, credits, desc
   (3, 'PHY201', 'Virtual', 4, 'Quantum Physics', 4);               -- ID 9
 
 -- Insert courses offered for above courses
-INSERT INTO courses_terms_offered (course_id, terms_offered) VALUES
+INSERT INTO courses_terms_offered (course_id, term_offered) VALUES
   (1, 'Fall'),
   (1, 'Spring'),
   (2, 'Spring'),

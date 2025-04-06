@@ -124,6 +124,7 @@ type Mutation {
   updateInstructor(instructor: EditInstructorUpdate!): Instructor
 
   addCourse(course: AddCourseInput!): Course
+  courses_ids(ids: [ID!]): [Course!]
   updateCourse(course: EditCourseInput!): Course
 
   addSection(section: AddSectionInput!): Section
@@ -131,6 +132,8 @@ type Mutation {
 
   addCourseAttribute(courseAttribute: AddCourseAttributeInput!): CourseAttribute
   updateCourseAttribute(courseAttribute: EditCourseAttributeInput!): CourseAttribute
+
+  addCourseTermOffered(courseTermOffered: AddcourseTermOfferedInput!): Course
 
   addUser(user: AddUserInput!): User
   deleteUser(id: ID!): Boolean!
@@ -167,7 +170,6 @@ input AddCourseInput {
   department_id: ID!
   course_code: String!
   instruction_mode: String
-  terms_offered: String!
   credits: Int!
   description: String
   instructor_id: ID
@@ -178,7 +180,6 @@ input EditCourseInput {
   department_id: ID
   course_code: String
   instruction_mode: String
-  terms_offered: String
   credits: Int
   description: String
   instructor_id: ID
@@ -208,6 +209,12 @@ input EditCourseAttributeInput {
   id: ID!
   name: String
   description: String
+}
+
+# Course Terms Offered Mutation Inputs
+input AddcourseTermOfferedInput {
+  course_id: ID!
+  term_offered: String!
 }
 
 # User Mutation Inputs

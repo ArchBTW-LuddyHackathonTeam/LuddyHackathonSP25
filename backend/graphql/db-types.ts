@@ -70,6 +70,11 @@ export interface EditCourseAttributeInput extends EditInput {
     description ?: string;
 }
 
+export interface AddCourseTermOfferedInput extends AddInput {
+    course_id: number;
+    term_offered: string;
+}
+
 export interface AddUserInput extends AddInput {
     salt: string;
     username: string;

@@ -1,7 +1,7 @@
 import db from "./db";
 import { AddInput, EditInput, AddUserInput, AddDepartmentInput, EditDepartmentInput, AddInstructorInput,
     EditInstructorInput, AddCourseInput, EditCourseInput, AddSectionInput, EditSectionInput, AddCourseAttributeInput,
-    EditCourseAttributeInput } from "./db-types";
+    EditCourseAttributeInput, AddCourseTermOfferedInput } from "./db-types";
 
 const getById = (table: string, id: number) => {
   return db.prepare(`SELECT * FROM ${table} WHERE id = ?`).get(id)
@@ -138,7 +138,7 @@ export const resolvers = {
     terms_offered: (parent: any) => { 
       const result = db
         .prepare(`
-      SELECT terms_offered FROM courses_terms_offered WHERE course_id = ?
+      SELECT term_offered FROM courses_terms_offered WHERE course_id = ?
         `)
         .all(parent.id) as { terms_offered: string }[] 
 
@@ -211,7 +211,7 @@ export const resolvers = {
 
   Mutation: {
     addDepartment: (_parent: any, { department }: { department: AddDepartmentInput }) => 
-    addEntry("departments", department),
+        addEntry("departments", department),
 
     updateDepartment: (_parent: any, { department }: { department: EditDepartmentInput }) => 
         editEntry("departments", department),
@@ -239,6 +239,9 @@ export const resolvers = {
 
     updateCourseAttribute: (_parent: any, { courseAttribute }: { courseAttribute: EditCourseAttributeInput }) => 
         editEntry("course_attributes", courseAttribute),
+
+    addCourseTermOffered: (_parent: any, { courseTermOffered }: { courseTermOffered: AddCourseTermOfferedInput}) => 
+        addEntry("courses_terms_offered", courseTermOffered),
 
     addUser: (_parent: any, { user }: { user: AddUserInput }) => addEntry("users", user),
 
