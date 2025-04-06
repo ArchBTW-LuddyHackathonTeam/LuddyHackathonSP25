@@ -67,6 +67,22 @@ export const resolvers = {
 
     course_attributes: () => db.prepare('SELECT * FROM course_attributes').all(),
     course_attribute: (_parent: any, { id }: { id: number }) => getById('course_attributes', id),
+    course_attributes_abbrev: (_parent: any, { abbrev }: { abbrev: string }) => {
+        const nameMap: Record<string, string> = {
+            AH: "A&H",
+            SH: "S&H",
+            WC: "WC",
+            WL: "WL",
+            NM: "N&M",
+            IW: "IW",
+            EC: "EC",
+            MM: "MM",
+        };
+
+        const name = nameMap[abbrev] ?? (() => { throw Error("Invalid abbrev"); })();
+
+        return db.prepare("SELECT * FROM course_attributes WHERE name LIKE ?").all(name);
+    },
     
     users: () => db.prepare("SELECT * FROM users").all(),
     user: (_parent: any, { id }: { id: number }) => getById("users", id),

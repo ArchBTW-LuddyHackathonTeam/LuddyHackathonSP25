@@ -111,6 +111,7 @@ type Query {
 
   course_attributes: [CourseAttribute!]
   course_attribute(id: ID!): CourseAttribute
+  course_attributes_abbrev(abbrev: String!): [CourseAttribute!]
 
   users: [User!]
   user(id: ID!): User
