@@ -1,0 +1,325 @@
+[
+  {
+    "id": 1,
+    "titleValue": "Computer Science BS",
+    "attributes": [],
+    "preRecs": [
+      3,
+      17,
+      18,
+      19
+    ],
+    "dropdownChildren": false
+  },
+  {
+    "id": 3,
+    "titleValue": "Bachelors of Science",
+    "attributes": [],
+    "preRecs": [
+      4,
+      15,
+      16
+    ],
+    "dropdownChildren": false
+  },
+  {
+    "id": 4,
+    "titleValue": "General Education Requirements",
+    "attributes": [],
+    "preRecs": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "dropdownChildren": false
+  },
+  {
+    "id": 5,
+    "titleValue": "Complete One English Composition Course",
+    "numberValue": 1,
+    "attributes": [
+      "EC"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 6,
+    "titleValue": "Complete One Mathematical Modeling Course",
+    "numberValue": 1,
+    "attributes": [
+      "MM"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 7,
+    "titleValue": "Complete 6 credits of Arts and Humanities courses",
+    "numberValue": 6,
+    "attributes": [
+      "AH"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 8,
+    "titleValue": "Complete 6 credits of Social and Historical Studies courses",
+    "numberValue": 6,
+    "attributes": [
+      "SH"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 9,
+    "titleValue": "Complete 5 credits of Natural and Mathematical Science courses",
+    "numberValue": 5,
+    "attributes": [
+      "NM"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 10,
+    "titleValue": "World Languages & Cultures Requirement",
+    "attributes": [],
+    "preRecs": [
+      11,
+      12,
+      13
+    ],
+    "dropdownChildren": true
+  },
+  {
+    "id": 11,
+    "titleValue": "Language Study",
+    "attributes": [
+      "WL"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 12,
+    "titleValue": "Complete 6 credits of World Culture courses",
+    "numberValue": 6,
+    "attributes": [
+      "WC"
+    ],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 13,
+    "titleValue": "Study Abroad Program",
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 15,
+    "titleValue": "Complete 120 credit hours",
+    "numberValue": 120,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 16,
+    "titleValue": "Complete 36 credits at 300-400 level",
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 17,
+    "titleValue": "Complete 40 credits in Computer science core courses",
+    "numberValue": 40,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 18,
+    "titleValue": "Complete 16 credits in Mathematics courses",
+    "numberValue": 16,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 19,
+    "titleValue": "Computer Science Specialization",
+    "attributes": [],
+    "preRecs": [
+      20,
+      28
+    ],
+    "dropdownChildren": true
+  },
+  {
+    "id": 20,
+    "titleValue": "Software Engineering",
+    "attributes": [],
+    "preRecs": [
+      21,
+      22,
+      23,
+      25,
+      26,
+      27
+    ],
+    "dropdownChildren": false
+  },
+  {
+    "id": 21,
+    "titleValue": "CSCI-B 461 Database Concepts",
+    "attributes": [],
+    "preRecs": [],
+    "courseID": 461,
+    "dropdownChildren": false
+  },
+  {
+    "id": 22,
+    "titleValue": "CSCI-P 465 Software Engineering for Information Systems",
+    "attributes": [],
+    "preRecs": [],
+    "courseID": 465,
+    "dropdownChildren": false
+  },
+  {
+    "id": 23,
+    "titleValue": "Select one course from the following:",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      322,
+      466
+    ]
+  },
+  {
+    "id": 25,
+    "titleValue": "Select one course from the following:",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      323,
+      335
+    ]
+  },
+  {
+    "id": 26,
+    "titleValue": "Select one course from the following:",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      403,
+      414,
+      423,
+      436
+    ]
+  },
+  {
+    "id": 27,
+    "titleValue": "Select one additional P course",
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false
+  },
+  {
+    "id": 28,
+    "titleValue": "Systems",
+    "attributes": [],
+    "preRecs": [
+      29,
+      30,
+      31,
+      33,
+      34
+    ],
+    "dropdownChildren": false
+  },
+  {
+    "id": 29,
+    "titleValue": "CSCI-C 291 System Programming with C and Unix",
+    "attributes": [],
+    "preRecs": [],
+    "courseID": 291,
+    "dropdownChildren": false
+  },
+  {
+    "id": 30,
+    "titleValue": "CSCI-C 335 Computer Structures",
+    "attributes": [],
+    "preRecs": [],
+    "courseID": 335,
+    "dropdownChildren": false
+  },
+  {
+    "id": 31,
+    "titleValue": "Select one project course from the following:",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      436,
+      438,
+      442,
+      545
+    ]
+  },
+  {
+    "id": 33,
+    "titleValue": "Select one additional systems course from the following (Not used for project course):",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      434,
+      436,
+      438,
+      441,
+      442,
+      443,
+      490,
+      545
+    ]
+  },
+  {
+    "id": 34,
+    "titleValue": "Select one course from the following:",
+    "numberValue": 1,
+    "attributes": [],
+    "preRecs": [],
+    "dropdownChildren": false,
+    "chooseNClasses": [
+      401,
+      403,
+      405
+    ]
+  },
+  {
+    "id": 35,
+    "titleValue": "Do cool things!",
+    "attributes": [],
+    "preRecs": [
+      3
+    ],
+    "dropdownChildren": false
+  }
+]

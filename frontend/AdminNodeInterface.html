@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Degree Map Builder - Vanilla JS</title>
+  <style>
+    :root {
+      --bg-primary: #121212;
+      --bg-secondary: #1e1e1e;
+      --bg-tertiary: #2d2d2d;
+      --text-primary: #ffffff;
+      --text-secondary: #b3b3b3;
+      --accent-primary: #6C5CE7;
+      --accent-secondary: #00D2D3;
+      --accent-danger: #ff5252;
+      --border-color: #333333;
+      --node-bg: #272727;
+      --node-border: #6C5CE7;
+      --node-selected-border: #00D2D3;
+      --badge-bg: #383838;
+      --badge-text: #00D2D3;
+      --toast-bg: #333333;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+    
+    .app-container {
+      display: flex;
+      height: 100vh;
+      width: 100vw;
+      position: relative;
+    }
+    
+    .sidebar {
+      position: absolute;
+      width: 340px;
+      background-color: var(--bg-secondary);
+      height: 100%;
+      right: 0;
+      padding: 20px;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      overflow-y: auto;
+      transition: transform 0.3s ease-in-out;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar.hidden {
+      transform: translateX(100%);
+    }
+    
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .sidebar-header h1 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin: 0;
+      color: var(--text-primary);
+    }
+    
+    .sidebar-header button {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+    
+    .sidebar-header button:hover {
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+    
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 10px;
+      background-color: var(--bg-tertiary);
+      color: var(--text-primary);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 2px rgba(108, 92, 231, 0.25);
+    }
+    
+    button {
+      padding: 10px 16px;
+      background-color: var(--accent-primary);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    button:hover {
+      background-color: #5649c0;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(108, 92, 231, 0.3);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .btn-danger {
+      background-color: var(--accent-danger);
+    }
+    
+    .btn-danger:hover {
+      background-color: #ff3838;
+      box-shadow: 0 3px 10px rgba(255, 82, 82, 0.3);
+    }
+
+    .btn-secondary {
+      background-color: var(--accent-secondary);
+      margin-left: 8px;
+    }
+    
+    .btn-secondary:hover {
+      background-color: #00bec4;
+      box-shadow: 0 3px 10px rgba(0, 210, 211, 0.3);
+    }
+    
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+    
+    .btn-ghost:hover {
+      background-color: var(--bg-tertiary);
+      box-shadow: none;
+      color: var(--text-primary);
+    }
+    
+    .graph-container {
+      flex: 1;
+      background-color: var(--bg-primary);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .node {
+      background-color: var(--node-bg);
+      border: 2px solid var(--node-border);
+      border-radius: 8px;
+      padding: 16px;
+      width: 220px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      cursor: move;
+      position: absolute;
+      user-select: none;
+      transition: box-shadow 0.2s, transform 0.1s, border-color 0.2s;
+    }
+    
+    .node:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      transform: translateY(-2px);
+    }
+    
+    .node.selected {
+      border-color: var(--node-selected-border);
+      box-shadow: 0 8px 25px rgba(0, 210, 211, 0.25);
+    }
+    
+    .node h3 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .node-property {
+      margin-bottom: 8px;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    
+    .node-property strong {
+      min-width: 70px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-right: 4px;
+    }
+    
+    .node-property span {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      word-break: break-word;
+    }
+    
+    .edge {
+      stroke: rgba(179, 179, 179, 0.6);
+      stroke-width: 2px;
+      marker-end: url(#arrowhead);
+      transition: stroke 0.2s;
+      stroke-linecap: round;
+      fill: none;
+    }
+
+    .edge:hover {
+      stroke-width: 3.5px;
+      fill:none;
+    }
+    
+    .spacer {
+      flex-grow: 1;
+    }
+    
+    .control-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      background-color: var(--bg-secondary);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      border-radius: 8px;
+      z-index: 90;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .badge-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    
+    .badge {
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 12px;
+      background-color: var(--badge-bg);
+      color: var(--badge-text);
+      font-weight: 500;
+    }
+    
+    .attributes-group {
+      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    .attribute-item {
+      display: flex;
+      align-items: center;
+    }
+    
+    .attribute-item input[type="checkbox"] {
+      width: auto;
+      margin-right: 8px;
+      margin-bottom: 0;
+      accent-color: var(--accent-primary);
+    }
+    
+    .attribute-item label {
+      margin-bottom: 0;
+      cursor: pointer;
+    }
+    
+    .array-input {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    
+    .array-input button {
+      padding: 8px 12px;
+      font-size: 0.8rem;
+    }
+    
+    .array-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .array-value {
+      display: flex;
+      align-items: center;
+      background-color: var(--badge-bg);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+    
+    .array-value button {
+      background: none;
+      border: none;
+      color: var(--accent-danger);
+      cursor: pointer;
+      padding: 0;
+      margin-left: 8px;
+      font-size: 1rem;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s;
+    }
+    
+    .array-value button:hover {
+      background-color: rgba(255, 82, 82, 0.2);
+      transform: none;
+      box-shadow: none;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: var(--toast-bg);
+      color: white;
+      padding: 14px 24px;
+      border-radius: 6px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      animation: slideIn 0.3s, fadeOut 0.5s 2.5s forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+    
+    .context-menu {
+      position: absolute;
+      background-color: var(--bg-tertiary);
+      border-radius: 6px;
+      padding: 6px 0;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      z-index: 100;
+      min-width: 180px;
+    }
+    
+    .context-menu-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.2s;
+    }
+    
+    .context-menu-item:hover {
+      background-color: var(--bg-secondary);
+    }
+    
+    .icon {
+      font-size: 1rem;
+    }
+    
+    .tooltip {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 90;
+    }
+    
+    .tooltip-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background-color: var(--bg-tertiary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .tooltip-icon:hover {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .tooltip-content {
+      position: absolute;
+      top: 46px;
+      right: 0;
+      background-color: var(--bg-tertiary);
+      border-radius: 6px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      width: 280px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: all 0.3s;
+    }
+    
+    .tooltip-content.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .tooltip-content h4 {
+      margin-bottom: 10px;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+    
+    .tooltip-content ul {
+      list-style-type: none;
+      margin-left: 0;
+      padding-left: 0;
+    }
+    
+    .tooltip-content li {
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    
+    .tooltip-content li .shortcut {
+      background-color: var(--bg-secondary);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 0.75rem;
+      margin-left: 5px;
+    }
+    
+    .btn-icon {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    .footer-actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    .node-id-badge {
+      background-color: var(--accent-primary);
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: white;
+      margin-left: 8px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+    }
+
+    .checkbox-container {
+      margin-left: 8px;
+    }
+    
+    /* Hide file input visually but keep it accessible */
+    .file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="app-container">
+      <!-- Main canvas container -->
+      <div id="graph-container" class="graph-container">
+        <svg width="100%" height="100%" id="svg-canvas">
+          <defs>
+            <marker 
+              id="arrowhead" 
+              markerWidth="10" 
+              markerHeight="7" 
+              refX="9" 
+              refY="3.5" 
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="#6C5CE7" />
+            </marker>
+          </defs>
+        </svg>
+        
+        <!-- Top control bar -->
+        <div class="control-bar">
+          <div class="btn-group">
+            <button id="import-btn">Import JSON</button>
+            <button id="export-btn">Export JSON</button>
+          </div>
+          <!-- Hidden file input for import -->
+          <input type="file" id="file-input" class="file-input" accept=".json" />
+        </div>
+        
+        <!-- Help tooltip -->
+        <div class="tooltip">
+          <div class="tooltip-icon" id="help-icon">?</div>
+          <div class="tooltip-content" id="help-content">
+            <h4>Quick Help</h4>
+            <ul>
+              <li>
+                <span>⬅️</span> Drag nodes with the left mouse button
+              </li>
+              <li>
+                <span>🖱️</span> Right-click on canvas to add a node
+              </li>
+              <li>
+                <span>✋</span> Pan canvas with MIDDLE mouse button
+              </li>
+              <li>
+                <span>🔄</span> "Add Child" adds a node that references the selected node
+              </li>
+              <li>
+                <span>💾</span> Export your graph using the Export button
+              </li>
+              <li>
+                <span>📥</span> Import a JSON structure with the Import button
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Sidebar for node editing -->
+      <div id="sidebar" class="sidebar hidden">
+        <div class="sidebar-header">
+          <h1 id="sidebar-title">
+            Node Editor
+            <span id="node-id-badge" class="node-id-badge"></span>
+          </h1>
+          <button id="close-sidebar">×</button>
+        </div>
+        
+        <div class="form-group">
+          <label for="titleValue">Title Value</label>
+          <input 
+            type="text" 
+            id="titleValue" 
+            name="titleValue" 
+            placeholder="Enter title"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="numberValue">Number Value</label>
+          <input 
+            type="number" 
+            id="numberValue" 
+            name="numberValue" 
+            placeholder="Enter a number"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="courseID">Course ID</label>
+          <input 
+            type="number" 
+            id="courseID" 
+            name="courseID" 
+            placeholder="Enter a course ID"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="department">Department</label>
+          <input 
+            type="text" 
+            id="department" 
+            name="department" 
+            placeholder="Enter department"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="dropdownChildren" class="checkbox-label">
+            Dropdown Children?
+            <div class="checkbox-container">
+              <input
+                type="checkbox"
+                id="dropdownChildren"
+                name="dropdownChildren"
+              />
+            </div>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Choose N Classes</label>
+          <div class="array-input">
+            <input 
+              type="number" 
+              id="choose-n-input"
+              placeholder="Enter a number"
+            />
+            <button id="add-choose-n" class="btn-secondary">Add</button>
+          </div>
+          <div class="array-values" id="choose-n-list">
+            <!-- Choose N values will be added here -->
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Attributes</label>
+          <div class="attributes-group" id="attributes-group">
+            <!-- Attribute checkboxes will be added here -->
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Prerequisites (by node ID)</label>
+          <div class="array-input">
+            <input 
+              type="number" 
+              id="prereq-input"
+              placeholder="Enter node ID"
+            />
+            <button id="add-prereq" class="btn-secondary">Add</button>
+          </div>
+          <div class="array-values" id="prereq-list">
+            <!-- Prereq tags will be added here -->
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        
+        <div class="footer-actions" id="footer-actions">
+          <!-- Buttons will be added here based on state -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Constants
+    const Attribute = {
+      AH: "A&H",
+      SH: "S&H",
+      WC: "World Culture",
+      WL: "World Language",
+      NM: "N&M",
+      IW: "Intensive Writing",
+      EC: "English Composition",
+      MM: "Mathematical Modeling",
+    };
+
+    // Define attribute options
+    const attributeOptions = [
+      { label: "Arts & Humanities (A&H)", value: Attribute.AH },
+      { label: "Social & Historical (S&H)", value: Attribute.SH },
+      { label: "World Culture (WC)", value: Attribute.WC },
+      { label: "World Language (WL)", value: Attribute.WL },
+      { label: "Natural & Mathematical (N&M)", value: Attribute.NM },
+      { label: "Intensive Writing (IW)", value: Attribute.IW },
+      { label: "English Composition (EC)", value: Attribute.EC },
+      { label: "Mathematical Modeling (MM)", value: Attribute.MM },
+    ];
+
+    // Main App class
+    class DegreeMapBuilder {
+      constructor() {
+        // State
+        this.nodes = [];
+        this.selectedId = null;
+        this.lastId = 0;
+        this.formData = {
+          titleValue: '',
+          numberValue: '',
+          courseID: '',
+          department: '',
+          dropdownChildren: false,
+          attributes: [],
+          preRecs: [], // Now stores numbers (IDs) instead of node references
+          chooseNClasses: [] // New field
+        };
+        this.currentPrereqID = '';
+        this.currentChooseN = '';
+        this.toast = null;
+        this.contextMenu = null;
+        this.pan = { x: 0, y: 0 };
+        this.isPanning = false;
+        this.panStart = { x: 0, y: 0 };
+        
+        // DOM References
+        this.container = document.getElementById('graph-container');
+        this.svgCanvas = document.getElementById('svg-canvas');
+        this.sidebar = document.getElementById('sidebar');
+        this.nodeIdBadge = document.getElementById('node-id-badge');
+        this.footerActions = document.getElementById('footer-actions');
+        this.helpIcon = document.getElementById('help-icon');
+        this.helpContent = document.getElementById('help-content');
+        this.fileInput = document.getElementById('file-input');
+        
+        // Form elements
+        this.titleInput = document.getElementById('titleValue');
+        this.numberInput = document.getElementById('numberValue');
+        this.courseIdInput = document.getElementById('courseID');
+        this.departmentInput = document.getElementById('department');
+        this.dropdownCheckbox = document.getElementById('dropdownChildren');
+        this.attributesGroup = document.getElementById('attributes-group');
+        this.prereqInput = document.getElementById('prereq-input');
+        this.prereqList = document.getElementById('prereq-list');
+        this.chooseNInput = document.getElementById('choose-n-input');
+        this.chooseNList = document.getElementById('choose-n-list');
+        
+        // Initialize UI
+        this.initUI();
+        this.registerEventListeners();
+      }
+      
+      // Initialize UI
+      initUI() {
+        // Create attribute checkboxes
+        attributeOptions.forEach(attr => {
+          const item = document.createElement('div');
+          item.className = 'attribute-item';
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = `attr-${attr.value}`;
+          checkbox.dataset.attribute = attr.value;
+          
+          const label = document.createElement('label');
+          label.htmlFor = `attr-${attr.value}`;
+          label.textContent = attr.label;
+          
+          item.appendChild(checkbox);
+          item.appendChild(label);
+          this.attributesGroup.appendChild(item);
+          
+          checkbox.addEventListener('change', (e) => {
+            this.handleAttributeToggle(attr.value, e.target.checked);
+          });
+        });
+        
+        // Set up footer actions (initially hidden)
+        this.updateFooterActions();
+      }
+      
+      // Register all event listeners
+      registerEventListeners() {
+        // Canvas events
+        this.container.addEventListener('mousedown', this.handleCanvasMouseDown.bind(this));
+        this.container.addEventListener('click', this.handleCanvasClick.bind(this));
+        this.container.addEventListener('contextmenu', this.handleContextMenu.bind(this));
+        
+        // Global mouse events for panning
+        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        
+        // UI control events
+        document.getElementById('close-sidebar').addEventListener('click', this.closeSidebar.bind(this));
+        document.getElementById('export-btn').addEventListener('click', this.exportJson.bind(this));
+        document.getElementById('import-btn').addEventListener('click', () => this.fileInput.click());
+        this.fileInput.addEventListener('change', this.handleFileSelect.bind(this));
+        document.getElementById('add-prereq').addEventListener('click', this.addPrereqByID.bind(this));
+        document.getElementById('add-choose-n').addEventListener('click', this.addChooseN.bind(this));
+        
+        // Help tooltip
+        this.helpIcon.addEventListener('click', () => {
+          this.helpContent.classList.toggle('visible');
+        });
+        
+        // Form input listeners
+        this.titleInput.addEventListener('input', (e) => this.formData.titleValue = e.target.value);
+        this.numberInput.addEventListener('input', (e) => this.formData.numberValue = e.target.value);
+        this.courseIdInput.addEventListener('input', (e) => this.formData.courseID = e.target.value);
+        this.departmentInput.addEventListener('input', (e) => this.formData.department = e.target.value);
+        this.dropdownCheckbox.addEventListener('change', (e) => this.formData.dropdownChildren = e.target.checked);
+        this.prereqInput.addEventListener('input', (e) => this.currentPrereqID = e.target.value);
+        this.chooseNInput.addEventListener('input', (e) => this.currentChooseN = e.target.value);
+      }
+      
+      // Handle file selection for import
+      handleFileSelect(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const jsonData = JSON.parse(event.target.result);
+            this.importJson(jsonData);
+          } catch (error) {
+            this.showToast(`Error parsing JSON: ${error.message}`);
+          }
+          
+          // Reset the file input
+          this.fileInput.value = '';
+        };
+        
+        reader.readAsText(file);
+      }
+      
+      // Import JSON data
+      importJson(jsonData) {
+        if (!Array.isArray(jsonData)) {
+          this.showToast('Invalid JSON format: Expected an array of nodes');
+          return;
+        }
+        
+        try {
+          // Clear existing nodes
+          this.nodes = [];
+          this.selectedId = null;
+          
+          // Process imported nodes
+          jsonData.forEach(nodeData => {
+            if (!nodeData.id) {
+              throw new Error('Node missing required ID property');
+            }
+            
+            // Create a new node object
+            const newNode = {
+              id: nodeData.id,
+              titleValue: nodeData.titleValue || undefined,
+              numberValue: nodeData.numberValue !== undefined ? nodeData.numberValue : undefined,
+              courseID: nodeData.courseID !== undefined ? nodeData.courseID : undefined,
+              department: nodeData.department || undefined,
+              dropdownChildren: nodeData.dropdownChildren || false,
+              attributes: nodeData.attributes || [],
+              preRecs: nodeData.preRecs || [],
+              chooseNClasses: nodeData.chooseNClasses || [],
+              // We'll set positions in our layout algorithm
+              x: 0,
+              y: 0
+            };
+            
+            // Add node to our nodes array
+            this.nodes.push(newNode);
+            
+            // Update lastId if necessary
+            if (nodeData.id > this.lastId) {
+              this.lastId = nodeData.id;
+            }
+          });
+          
+          // Calculate positions using hierarchical layout
+          this.calculateHierarchicalLayout();
+          
+          // Render the imported nodes
+          this.renderNodes();
+          
+          this.showToast('JSON data imported successfully');
+        } catch (error) {
+          this.showToast(`Error importing JSON: ${error.message}`);
+        }
+      }
+      
+      // Calculate hierarchical layout for nodes
+      calculateHierarchicalLayout() {
+        // Step 1: Build adjacency list
+        const adjacencyList = {};
+        const incomingEdges = {};
+        this.nodes.forEach(node => {
+          adjacencyList[node.id] = [];
+          incomingEdges[node.id] = 0;
+        });
+        
+        // Connect nodes based on prerequisites
+        this.nodes.forEach(node => {
+          if (node.preRecs && node.preRecs.length > 0) {
+            node.preRecs.forEach(parentId => {
+              if (adjacencyList[parentId]) {
+                adjacencyList[parentId].push(node.id);
+                incomingEdges[node.id] = (incomingEdges[node.id] || 0) + 1;
+              }
+            });
+          }
+        });
+        
+        // Step 2: Find root nodes (nodes with no incoming edges)
+        const rootNodes = this.nodes
+          .filter(node => !incomingEdges[node.id] || incomingEdges[node.id] === 0)
+          .map(node => node.id);
+        
+        // Step 3: Assign levels to nodes using BFS
+        const levels = {};
+        const processQueue = rootNodes.map(id => ({ id, level: 0 }));
+        
+        while (processQueue.length > 0) {
+          const { id, level } = processQueue.shift();
+          levels[id] = level;
+          
+          // Process children
+          adjacencyList[id].forEach(childId => {
+            // Ensure we process a node only after all its parents have been processed
+            incomingEdges[childId]--;
+            if (incomingEdges[childId] === 0) {
+              processQueue.push({ id: childId, level: level + 1 });
+            }
+          });
+        }
+        
+        // Step 4: Group nodes by levels
+        const nodesByLevel = {};
+        Object.entries(levels).forEach(([id, level]) => {
+          if (!nodesByLevel[level]) nodesByLevel[level] = [];
+          nodesByLevel[level].push(parseInt(id));
+        });
+        
+        // Step 5: Position nodes by level
+        const levelHeight = 180; // Vertical distance between levels
+        const nodeWidth = 220;   // Width of a node
+        const nodeSpacing = 40;  // Horizontal spacing between nodes
+        
+        Object.entries(nodesByLevel).forEach(([level, nodesInLevel]) => {
+          const levelNum = parseInt(level);
+          const levelY = levelNum * levelHeight + 50; // Starting Y position for this level
+          
+          // Calculate total width needed for this level
+          const totalWidth = nodesInLevel.length * nodeWidth + (nodesInLevel.length - 1) * nodeSpacing;
+          const startX = (window.innerWidth - totalWidth) / 2; // Center the level
+          
+          // Position each node in the level
+          nodesInLevel.forEach((nodeId, index) => {
+            const nodeX = startX + index * (nodeWidth + nodeSpacing);
+            const node = this.nodes.find(n => n.id === nodeId);
+            if (node) {
+              node.x = nodeX;
+              node.y = levelY;
+            }
+          });
+        });
+      }
+      
+      // Handle canvas mouse down (for panning)
+      handleCanvasMouseDown(e) {
+        // Only panning with MIDDLE mouse (button=1)
+        if (e.button === 1) {
+          this.isPanning = true;
+          const rect = this.container.getBoundingClientRect();
+          this.panStart = {
+            x: e.clientX - rect.left - this.pan.x,
+            y: e.clientY - rect.top - this.pan.y
+          };
+          e.preventDefault();
+        }
+      }
+      
+      // Handle mouse move (for panning and dragging)
+      handleMouseMove(e) {
+        if (this.isPanning) {
+          e.preventDefault();
+          const rect = this.container.getBoundingClientRect();
+          const newX = e.clientX - rect.left - this.panStart.x;
+          const newY = e.clientY - rect.top - this.panStart.y;
+          this.pan = { x: newX, y: newY };
+          this.updateNodesPosition();
+        }
+      }
+      
+      // Handle mouse up (end panning or dragging)
+      handleMouseUp(e) {
+        if (e.button === 1) {
+          this.isPanning = false;
+        }
+      }
+      
+      // Handle canvas click (deselect)
+      handleCanvasClick(e) {
+        if (this.isPanning) return;
+        if (e.target === this.container || e.target === this.svgCanvas) {
+          this.setSelectedId(null);
+          this.resetForm();
+        }
+      }
+      
+      // Handle context menu (right-click)
+      handleContextMenu(e) {
+        e.preventDefault();
+        if (e.target === this.container || e.target === this.svgCanvas) {
+          const rect = this.container.getBoundingClientRect();
+          this.showContextMenu(e.clientX - rect.left, e.clientY - rect.top);
+        }
+      }
+      
+      // Show context menu
+      showContextMenu(x, y) {
+        // Remove existing menu if any
+        this.hideContextMenu();
+        
+        // Create new menu
+        const menu = document.createElement('div');
+        menu.className = 'context-menu';
+        menu.style.left = `${x}px`;
+        menu.style.top = `${y}px`;
+        
+        const addItem = document.createElement('div');
+        addItem.className = 'context-menu-item';
+        addItem.innerHTML = '<span class="icon">+</span> Add Node';
+        addItem.addEventListener('click', () => {
+          this.addNodeAt(x, y);
+          this.hideContextMenu();
+        });
+        
+        menu.appendChild(addItem);
+        this.container.appendChild(menu);
+        this.contextMenu = menu;
+        
+        // Close on click outside
+        setTimeout(() => {
+          document.addEventListener('click', this.hideContextMenu.bind(this), { once: true });
+        }, 0);
+      }
+      
+      // Hide context menu
+      hideContextMenu() {
+        if (this.contextMenu) {
+          this.contextMenu.remove();
+          this.contextMenu = null;
+        }
+      }
+      
+      // Add node at position
+      addNodeAt(x, y) {
+        const newId = this.lastId + 1;
+        const newNode = {
+          id: newId,
+          titleValue: '',
+          numberValue: undefined,
+          courseID: undefined,
+          department: undefined,
+          dropdownChildren: false,
+          attributes: [],
+          preRecs: [],
+          chooseNClasses: [],
+          x: x - this.pan.x - 110, // Center the node at cursor
+          y: y - this.pan.y - 40
+        };
+        
+        this.nodes.push(newNode);
+        this.lastId = newId;
+        this.setSelectedId(newId);
+        this.resetForm();
+        this.renderNodes();
+      }
+      
+      // Handle attribute toggle
+      handleAttributeToggle(value, checked) {
+        if (checked) {
+          if (!this.formData.attributes.includes(value)) {
+            this.formData.attributes.push(value);
+          }
+        } else {
+          this.formData.attributes = this.formData.attributes.filter(attr => attr !== value);
+        }
+      }
+      
+      // Add prerequisite by ID
+      addPrereqByID() {
+        const parsed = parseInt(this.currentPrereqID, 10);
+        if (isNaN(parsed)) {
+          this.showToast("Please enter a valid numeric ID");
+          return;
+        }
+        
+        const foundNode = this.nodes.find(n => n.id === parsed);
+        if (!foundNode) {
+          this.showToast(`Node with ID ${parsed} does not exist`);
+          return;
+        }
+        
+        // Avoid duplicates
+        if (!this.formData.preRecs.includes(parsed)) {
+          this.formData.preRecs.push(parsed);
+          this.updatePrereqList();
+        }
+        
+        this.prereqInput.value = '';
+        this.currentPrereqID = '';
+      }
+      
+      // Remove prerequisite
+      removePrereq(index) {
+        this.formData.preRecs.splice(index, 1);
+        this.updatePrereqList();
+      }
+      
+      // Update prerequisite list in UI
+      updatePrereqList() {
+        this.prereqList.innerHTML = '';
+        this.formData.preRecs.forEach((nodeId, index) => {
+          const item = document.createElement('div');
+          item.className = 'array-value';
+          item.textContent = nodeId;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.innerHTML = '×';
+          removeBtn.addEventListener('click', () => this.removePrereq(index));
+          
+          item.appendChild(removeBtn);
+          this.prereqList.appendChild(item);
+        });
+      }
+
+      // Add choose N value
+      addChooseN() {
+        const parsed = parseInt(this.currentChooseN, 10);
+        if (isNaN(parsed)) {
+          this.showToast("Please enter a valid number");
+          return;
+        }
+        
+        // Avoid duplicates
+        if (!this.formData.chooseNClasses.includes(parsed)) {
+          this.formData.chooseNClasses.push(parsed);
+          this.updateChooseNList();
+        }
+        
+        this.chooseNInput.value = '';
+        this.currentChooseN = '';
+      }
+      
+      // Remove choose N value
+      removeChooseN(index) {
+        this.formData.chooseNClasses.splice(index, 1);
+        this.updateChooseNList();
+      }
+      
+      // Update choose N list in UI
+      updateChooseNList() {
+        this.chooseNList.innerHTML = '';
+        this.formData.chooseNClasses.forEach((value, index) => {
+          const item = document.createElement('div');
+          item.className = 'array-value';
+          item.textContent = value;
+          
+          const removeBtn = document.createElement('button');
+          removeBtn.innerHTML = '×';
+          removeBtn.addEventListener('click', () => this.removeChooseN(index));
+          
+          item.appendChild(removeBtn);
+          this.chooseNList.appendChild(item);
+        });
+      }
+      
+      // Create new node
+      createNode() {
+        const newId = this.lastId + 1;
+        const numberVal = this.formData.numberValue.trim() === '' ? undefined : parseInt(this.formData.numberValue);
+        const courseVal = this.formData.courseID.trim() === '' ? undefined : parseInt(this.formData.courseID);
+
+        const newNode = {
+          id: newId,
+          titleValue: this.formData.titleValue || undefined,
+          numberValue: numberVal,
+          courseID: courseVal,
+          department: this.formData.department || undefined,
+          dropdownChildren: this.formData.dropdownChildren,
+          attributes: [...this.formData.attributes],
+          preRecs: [...this.formData.preRecs],
+          chooseNClasses: [...this.formData.chooseNClasses],
+          x: 100,
+          y: 100,
+        };
+        
+        this.nodes.push(newNode);
+        this.setSelectedId(newId);
+        this.lastId = newId;
+        this.resetForm();
+        this.renderNodes();
+      }
+      
+      // Update existing node
+      updateNode() {
+        if (!this.selectedId) return;
+        const numberVal = this.formData.numberValue.trim() === '' ? undefined : parseInt(this.formData.numberValue);
+        const courseVal = this.formData.courseID.trim() === '' ? undefined : parseInt(this.formData.courseID);
+
+        this.nodes = this.nodes.map(node => {
+          if (node.id === this.selectedId) {
+            return {
+              ...node,
+              titleValue: this.formData.titleValue || undefined,
+              numberValue: numberVal,
+              courseID: courseVal,
+              department: this.formData.department || undefined,
+              dropdownChildren: this.formData.dropdownChildren,
+              attributes: [...this.formData.attributes],
+              preRecs: [...this.formData.preRecs],
+              chooseNClasses: [...this.formData.chooseNClasses]
+            };
+          }
+          return node;
+        });
+        
+        this.resetForm();
+        this.setSelectedId(null);
+        this.renderNodes();
+      }
+      
+      // Delete node
+      deleteNode() {
+        if (!this.selectedId) return;
+        const nodeToDelete = this.nodes.find(n => n.id === this.selectedId);
+        if (!nodeToDelete) return;
+
+        // Remove that node from the array
+        this.nodes = this.nodes.filter(n => n.id !== this.selectedId);
+
+        // Also remove references to that node from any node's preRecs
+        this.nodes = this.nodes.map(n => {
+          return {
+            ...n,
+            preRecs: n.preRecs.filter(prereqId => prereqId !== nodeToDelete.id)
+          };
+        });
+
+        this.resetForm();
+        this.setSelectedId(null);
+        this.renderNodes();
+        this.showToast("Node deleted successfully");
+      }
+      
+      // Add child node
+      addChildNode() {
+        if (!this.selectedId) return;
+        const parentNode = this.nodes.find(n => n.id === this.selectedId);
+        if (!parentNode) return;
+
+        const newId = this.lastId + 1;
+
+        // Create the child node with parent as a prerequisite
+        const childNode = {
+          id: newId,
+          titleValue: '',
+          numberValue: undefined,
+          courseID: undefined,
+          department: undefined,
+          dropdownChildren: false,
+          attributes: [],
+          preRecs: [parentNode.id], // Child has parent as prereq
+          chooseNClasses: [],
+          x: parentNode.x,
+          y: parentNode.y + 150 // Position child node below parent
+        };
+
+        // Add the child node to the global list
+        this.nodes.push(childNode);
+        this.lastId = newId;
+
+        this.setSelectedId(newId);
+        this.resetForm();
+        this.renderNodes();
+      }
+      
+      // Reset form
+      resetForm() {
+        this.formData = {
+          titleValue: '',
+          numberValue: '',
+          courseID: '',
+          department: '',
+          dropdownChildren: false,
+          attributes: [],
+          preRecs: [],
+          chooseNClasses: []
+        };
+        
+        // Reset form UI
+        this.titleInput.value = '';
+        this.numberInput.value = '';
+        this.courseIdInput.value = '';
+        this.departmentInput.value = '';
+        this.dropdownCheckbox.checked = false;
+        
+        // Reset attribute checkboxes
+        document.querySelectorAll('.attribute-item input[type="checkbox"]').forEach(checkbox => {
+          checkbox.checked = false;
+        });
+        
+        // Clear prereqs and choose N classes
+        this.prereqInput.value = '';
+        this.currentPrereqID = '';
+        this.prereqList.innerHTML = '';
+        
+        this.chooseNInput.value = '';
+        this.currentChooseN = '';
+        this.chooseNList.innerHTML = '';
+      }
+      
+      // Set selected ID and update UI
+      setSelectedId(id) {
+        this.selectedId = id;
+        
+        if (id !== null) {
+          const node = this.nodes.find(node => node.id === id);
+          if (node) {
+            // Update sidebar with node data
+            this.formData = {
+              titleValue: node.titleValue || '',
+              numberValue: node.numberValue !== undefined ? node.numberValue.toString() : '',
+              courseID: node.courseID !== undefined ? node.courseID.toString() : '',
+              department: node.department || '',
+              dropdownChildren: node.dropdownChildren || false,
+              attributes: node.attributes || [],
+              preRecs: node.preRecs || [],
+              chooseNClasses: node.chooseNClasses || []
+            };
+            
+            // Update form UI
+            this.titleInput.value = this.formData.titleValue;
+            this.numberInput.value = this.formData.numberValue;
+            this.courseIdInput.value = this.formData.courseID;
+            this.departmentInput.value = this.formData.department;
+            this.dropdownCheckbox.checked = this.formData.dropdownChildren;
+            
+            // Update attribute checkboxes
+            document.querySelectorAll('.attribute-item input[type="checkbox"]').forEach(checkbox => {
+              const attr = checkbox.dataset.attribute;
+              checkbox.checked = this.formData.attributes.includes(attr);
+            });
+            
+            // Update prereqs and choose N
+            this.updatePrereqList();
+            this.updateChooseNList();
+            
+            // Show sidebar
+            this.sidebar.classList.remove('hidden');
+            this.nodeIdBadge.textContent = `ID: ${id}`;
+            this.nodeIdBadge.style.display = 'inline';
+            
+            // Update footer actions
+            this.updateFooterActions();
+          }
+        } else {
+          // Hide sidebar
+          this.sidebar.classList.add('hidden');
+          this.nodeIdBadge.style.display = 'none';
+        }
+        
+        // Update node selections in UI
+        this.updateNodeSelections();
+      }
+      
+      // Update footer actions based on state
+      updateFooterActions() {
+        this.footerActions.innerHTML = '';
+        
+        if (this.selectedId) {
+          // Update button
+          const updateBtn = document.createElement('button');
+          updateBtn.textContent = 'Update Node';
+          updateBtn.addEventListener('click', this.updateNode.bind(this));
+          this.footerActions.appendChild(updateBtn);
+          
+          // Add Child button
+          const addChildBtn = document.createElement('button');
+          addChildBtn.textContent = 'Add Child';
+          addChildBtn.className = 'btn-secondary';
+          addChildBtn.addEventListener('click', this.addChildNode.bind(this));
+          this.footerActions.appendChild(addChildBtn);
+          
+          // Delete button
+          const deleteBtn = document.createElement('button');
+          deleteBtn.textContent = 'Delete';
+          deleteBtn.className = 'btn-danger';
+          deleteBtn.addEventListener('click', this.deleteNode.bind(this));
+          this.footerActions.appendChild(deleteBtn);
+        } else {
+          // Create button
+          const createBtn = document.createElement('button');
+          createBtn.textContent = 'Create Node';
+          createBtn.addEventListener('click', this.createNode.bind(this));
+          this.footerActions.appendChild(createBtn);
+        }
+      }
+      
+      // Close sidebar
+      closeSidebar() {
+        this.setSelectedId(null);
+        this.resetForm();
+      }
+      
+      // Render all nodes
+      renderNodes() {
+        // Clear existing nodes
+        const existingNodes = document.querySelectorAll('.node');
+        existingNodes.forEach(node => node.remove());
+        
+        // Clear existing edges
+        const edgeGroup = this.svgCanvas.querySelector('.edge-group');
+        if (edgeGroup) edgeGroup.remove();
+        
+        // Create edge group
+        const edgesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        edgesGroup.classList.add('edge-group');
+        this.svgCanvas.appendChild(edgesGroup);
+        
+        // Create edges
+        this.nodes.forEach(childNode => {
+          if (!childNode.preRecs) return;
+          
+          childNode.preRecs.forEach(parentId => {
+            // Find the parent node
+            const parentNode = this.nodes.find(n => n.id === parentId);
+            if (parentNode) {
+              // Create edge from parent to child
+              const edge = this.createEdge(childNode, parentNode);
+              edgesGroup.appendChild(edge);
+            }
+          });
+        });
+        
+        // Create nodes
+        this.nodes.forEach(node => {
+          const nodeElement = this.createNodeElement(node);
+          this.container.appendChild(nodeElement);
+        });
+        
+        this.updateNodeSelections();
+      }
+      
+      // Create edge SVG element
+      createEdge(childNode, parentNode) {
+        // Get the DOM elements for parent and child nodes
+        const parentElement = document.querySelector(`.node[data-node-id="${parentNode.id}"]`);
+        const childElement = document.querySelector(`.node[data-node-id="${childNode.id}"]`);
+        
+        // If elements don't exist yet, use default sizes
+        const nodeWidth = 220;
+        let parentHeight = 100;
+        let childHeight = 100;
+        
+        // Get actual heights if elements exist
+        if (parentElement) {
+          const parentRect = parentElement.getBoundingClientRect();
+          parentHeight = parentRect.height;
+        }
+        
+        if (childElement) {
+          const childRect = childElement.getBoundingClientRect();
+          childHeight = childRect.height;
+        }
+
+        // Child node: anchor at its TOP center
+        const startX = childNode.x + this.pan.x + (nodeWidth / 2);
+        const startY = childNode.y + this.pan.y;
+
+        // Parent node: anchor at its BOTTOM center
+        const endX = parentNode.x + this.pan.x + (nodeWidth / 2);
+        const endY = parentNode.y + this.pan.y + parentHeight;
+
+        const edge = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        edge.setAttribute('d', `M${startX},${startY} C${startX},${startY - 50} ${endX},${endY + 50} ${endX},${endY}`);
+        edge.setAttribute('class', 'edge');
+        return edge;
+      }
+      
+      // Create node DOM element
+      createNodeElement(node) {
+        const nodeElement = document.createElement('div');
+        nodeElement.className = `node ${this.selectedId === node.id ? 'selected' : ''}`;
+        nodeElement.dataset.nodeId = node.id;
+        nodeElement.style.left = `${node.x + this.pan.x}px`;
+        nodeElement.style.top = `${node.y + this.pan.y}px`;
+        
+        // Prevent default drag
+        nodeElement.setAttribute('draggable', 'false');
+        nodeElement.ondragstart = (ev) => ev.preventDefault();
+        
+        // Header
+        const header = document.createElement('h3');
+        header.textContent = `ID: ${node.id}`;
+        nodeElement.appendChild(header);
+        
+        // Title
+        if (node.titleValue) {
+          const title = this.createNodeProperty('Title:', node.titleValue);
+          nodeElement.appendChild(title);
+        }
+        
+        // Number
+        if (node.numberValue !== undefined) {
+          const number = this.createNodeProperty('Number:', node.numberValue);
+          nodeElement.appendChild(number);
+        }
+        
+        // CourseID
+        if (node.courseID !== undefined) {
+          const courseID = this.createNodeProperty('CourseID:', node.courseID);
+          nodeElement.appendChild(courseID);
+        }
+        
+        // Department
+        if (node.department) {
+          const department = this.createNodeProperty('Dept:', node.department);
+          nodeElement.appendChild(department);
+        }
+        
+        // Dropdown Children
+        if (node.dropdownChildren) {
+          const dropdown = this.createNodeProperty('Dropdown?:', 'Yes');
+          nodeElement.appendChild(dropdown);
+        }
+        
+        // Choose N Classes
+        if (node.chooseNClasses && node.chooseNClasses.length > 0) {
+          const chooseN = document.createElement('div');
+          chooseN.className = 'node-property';
+          
+          const label = document.createElement('strong');
+          label.textContent = 'Choose N:';
+          chooseN.appendChild(label);
+          
+          const badgeContainer = document.createElement('div');
+          badgeContainer.className = 'badge-container';
+          
+          node.chooseNClasses.forEach((value) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = value;
+            badgeContainer.appendChild(badge);
+          });
+          
+          chooseN.appendChild(badgeContainer);
+          nodeElement.appendChild(chooseN);
+        }
+        
+        // Attributes
+        if (node.attributes && node.attributes.length > 0) {
+          const attrs = document.createElement('div');
+          attrs.className = 'node-property';
+          
+          const label = document.createElement('strong');
+          label.textContent = 'Attrs:';
+          attrs.appendChild(label);
+          
+          const badgeContainer = document.createElement('div');
+          badgeContainer.className = 'badge-container';
+          
+          node.attributes.forEach((attr) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = attr;
+            badgeContainer.appendChild(badge);
+          });
+          
+          attrs.appendChild(badgeContainer);
+          nodeElement.appendChild(attrs);
+        }
+        
+        // PreRecs
+        if (node.preRecs && node.preRecs.length > 0) {
+          const prerecs = document.createElement('div');
+          prerecs.className = 'node-property';
+          
+          const label = document.createElement('strong');
+          label.textContent = 'PreRecs:';
+          prerecs.appendChild(label);
+          
+          const badgeContainer = document.createElement('div');
+          badgeContainer.className = 'badge-container';
+          
+          node.preRecs.forEach((prereqId) => {
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.textContent = prereqId;
+            badgeContainer.appendChild(badge);
+          });
+          
+          prerecs.appendChild(badgeContainer);
+          nodeElement.appendChild(prerecs);
+        }
+        
+        // Click to select
+        nodeElement.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.setSelectedId(node.id);
+        });
+        
+        // Prevent right-click from showing browser context menu
+        nodeElement.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        });
+        
+        // Node dragging
+        this.setupNodeDragging(nodeElement, node);
+        
+        return nodeElement;
+      }
+      
+      // Create node property element
+      createNodeProperty(label, value) {
+        const property = document.createElement('div');
+        property.className = 'node-property';
+        
+        const labelElement = document.createElement('strong');
+        labelElement.textContent = label;
+        
+        const valueElement = document.createElement('span');
+        valueElement.textContent = value;
+        
+        property.appendChild(labelElement);
+        property.appendChild(valueElement);
+        
+        return property;
+      }
+      
+      // Set up dragging for a node
+      setupNodeDragging(nodeElement, node) {
+        let dragging = false;
+        let offset = { x: 0, y: 0 };
+        
+        nodeElement.addEventListener('mousedown', (e) => {
+          // Only respond to left-click
+          if (e.button !== 0) return;
+          
+          // Prevent default
+          e.preventDefault();
+          e.stopPropagation();
+          
+          dragging = true;
+          
+          const containerRect = this.container.getBoundingClientRect();
+          offset = {
+            x: e.clientX - (node.x + this.pan.x + containerRect.left),
+            y: e.clientY - (node.y + this.pan.y + containerRect.top)
+          };
+          
+          // Add global event listeners
+          const handleMouseMove = (e) => {
+            if (!dragging) return;
+            e.preventDefault();
+            
+            const containerRect = this.container.getBoundingClientRect();
+            const newX = e.clientX - containerRect.left - this.pan.x - offset.x;
+            const newY = e.clientY - containerRect.top - this.pan.y - offset.y;
+            
+            this.moveNode(node.id, newX, newY);
+          };
+          
+          const handleMouseUp = () => {
+            dragging = false;
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+          };
+          
+          document.addEventListener('mousemove', handleMouseMove);
+          document.addEventListener('mouseup', handleMouseUp);
+        });
+      }
+      
+      // Move node
+      moveNode(id, x, y) {
+        this.nodes = this.nodes.map(node => 
+          node.id === id ? { ...node, x, y } : node
+        );
+        this.renderNodes();
+      }
+      
+      // Update node positions (for panning)
+      updateNodesPosition() {
+        const nodeElements = document.querySelectorAll('.node');
+        nodeElements.forEach(el => {
+          const nodeId = parseInt(el.dataset.nodeId, 10);
+          const node = this.nodes.find(n => n.id === nodeId);
+          if (node) {
+            el.style.left = `${node.x + this.pan.x}px`;
+            el.style.top = `${node.y + this.pan.y}px`;
+          }
+        });
+        
+        // Update edges
+        this.renderNodes();
+      }
+      
+      // Update node selection styling
+      updateNodeSelections() {
+        const nodeElements = document.querySelectorAll('.node');
+        nodeElements.forEach(el => {
+          const nodeId = parseInt(el.dataset.nodeId, 10);
+          if (this.selectedId === nodeId) {
+            el.classList.add('selected');
+          } else {
+            el.classList.remove('selected');
+          }
+        });
+      }
+      
+      // Export data to JSON
+      exportJson() {
+        // Create a clean export version of each node
+        const exportData = this.nodes.map(node => {
+          const cleanNode = {
+            id: node.id,
+            titleValue: node.titleValue,
+            numberValue: node.numberValue,
+            attributes: node.attributes ? [...node.attributes] : [],
+            preRecs: node.preRecs ? [...node.preRecs] : [],
+            courseID: node.courseID,
+            dropdownChildren: node.dropdownChildren
+          };
+          
+          // Add optional properties only if they exist
+          if (node.department) cleanNode.department = node.department;
+          if (node.chooseNClasses && node.chooseNClasses.length > 0) {
+            cleanNode.chooseNClasses = [...node.chooseNClasses];
+          }
+          
+          return cleanNode;
+        });
+        
+        const json = JSON.stringify(exportData, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'node-graph.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        this.showToast("JSON exported successfully!");
+      }
+      
+      // Show toast message
+      showToast(message) {
+        // Remove any existing toast
+        const existingToast = document.querySelector('.toast');
+        if (existingToast) {
+          existingToast.remove();
+        }
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 3000);
+      }
+    }
+
+    // Initialize the app when DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      const app = new DegreeMapBuilder();
+      app.renderNodes(); // Initial render
+    });
+  </script>
+</body>
+</html>
