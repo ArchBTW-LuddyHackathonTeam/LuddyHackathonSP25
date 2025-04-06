@@ -13,6 +13,7 @@ import { resolvers } from "./graphql/resolvers";
 import usersRoute from "./routes/users"
 import schedulerRoute from "./routes/scheduler"
 import nodeRoute from "./routes/node";
+import classesRoute from "./routes/classes"
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(morgan("dev"));
 app.use("/users", usersRoute);
 app.use("/scheduler", schedulerRoute);
 app.use("/node", nodeRoute);
+app.use("/classes", classesRoute);
 
 const apolloServer = new ApolloServer({
     typeDefs,
