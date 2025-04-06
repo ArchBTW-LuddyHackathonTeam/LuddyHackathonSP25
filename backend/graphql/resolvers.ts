@@ -143,9 +143,9 @@ export const resolvers = {
         .prepare(`
       SELECT term_offered FROM courses_terms_offered WHERE course_id = ?
         `)
-        .all(parent.id) as { terms_offered: string }[] 
+        .all(parent.id) as { term_offered: string }[] 
 
-      return result.map(inner => inner.terms_offered);
+      return result.map(inner => inner.term_offered);
     }, 
   },
 
