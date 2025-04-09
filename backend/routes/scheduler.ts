@@ -3,10 +3,14 @@ import OpenAI from "openai"
 import internalRequest from "../graphql/internal"
 import { Class } from "../graphql/db-types"
 
-const client = new OpenAI()
+const client = (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY != "") ? new OpenAI() : null
 const router = Router()
 
 router.post("/prompt", (req, res) => {
+    if (!client) {
+        res.status(503).json({ message: "This service has been disabled" })
+        return
+    }
     if (req.body.input) {
         internalRequest(`
             query Courses {
